@@ -2,7 +2,7 @@
 #SBATCH --job-name=prepare_DEseq_inputs
 #SBATCH --partition=batch
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=4
+#SBATCH --ntasks=4
 #SBATCH --mem=1gb
 #SBATCH --time=40:00:00
 #SBATCH --output=ErrorFiles/prepare_DEseq_inputs.%j.out
@@ -12,7 +12,7 @@
 
 
 
-for fn in /scratch/ely67071/sunflower_inflo_dev_data/gene_count_data/*.tab; do
+for fn in /scratch/ely67071/sunflower_inflo_dev_data_b3/gene_count_data/*.tab; do
     awk -F '\t' 'NR>4 { print $1, $4 }' "$fn" >tmp_file 
     mv tmp_file "$fn"
 done    

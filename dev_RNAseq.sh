@@ -196,7 +196,7 @@ fi
         fi
         echo "Max array index is ${Maxarray}">&2
         if [[ "$QUEUE" == "PBS" ]]; then
-            echo "PBS is our workload manager/job scheduler."
+		echo "PBS is our workload manager/job scheduler."
 
             echo "source ${CONFIG} && source ${DEV_RNASEQ}/Read_Mapping.sh" | qsub -l "${RM_QSUB}" -e "${ERROR}" -o "${ERROR}" -m abe -M "${EMAIL}" -N "${PROJECT}"_Read_Mapping -V -t 1-"${Maxarray}"
        
@@ -209,4 +209,5 @@ fi
 
 
  ;;
- 
+ * )
+esac 

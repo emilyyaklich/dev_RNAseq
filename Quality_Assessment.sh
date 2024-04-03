@@ -3,8 +3,7 @@
 set -o pipefail
 
 module load FastQC/0.11.9-Java-11
-
-module load multiqc/1.11-GCCcore-8.3.0-Python-3.8.2
+module load MultiQC/1.14-foss-2022a
 
 if [[ -d "$QA_INPUTDIR" ]]; then
 	for f in `find $QA_INPUTDIR -name "*${SUFFIX}"`; do

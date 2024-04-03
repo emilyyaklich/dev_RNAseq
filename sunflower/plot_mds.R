@@ -9,18 +9,17 @@ library(readxl)
 library(DESeq2)
 library(dplyr)
 library(Glimma)
-library(RUVSeq)
 library(sva)
+install.packages("Glimma")
 
-
-setwd('/home/ely67071/sunflower_inflo_dev_analysis/')
+setwd('/home/ely67071/dev_RNAseq/')
 
 # read in the data matrix
-summed_counts<-readRDS("/scratch/ely67071/sunflower_inflo_dev_data/collapsed_replicates_deseq_dataset.Rdata")
+summed_counts<-readRDS("/home/ely67071/dev_RNAseq/sunflower/gene_count_sunflower_info_deseq.Rdata")
 dim(summed_counts)
 
 
-summed_counts$replicates
+summed_counts
 
 
 samples=c("10D_REP1_ATTACTCG", "20D_REP2_TCCGGAGA" ,"30D_REP2_CGCTCATT", "35D_REP1_GAGATTCC", 
@@ -31,6 +30,7 @@ dev_stage<-sub(".*([0-9]{2,2}D).*", "\\1",samples)
 
 
 metadata<-data.frame(samples, dev_stage)
+write.csv(as.data.frame(metadata), file='sunflower/metadata.csv')
 
 # create the factors of interest
 metadata$dev_stage<-factor(metadata$dev_stage)
@@ -49,10 +49,10 @@ summed_counts_filt<-summed_counts[keep,]
 glimmaMDS(summed_counts_filt, groups=metadata)
 
 # plot PCA 
-png("plots/pca_raw_data.png", res=215, width = 1200, height=1000)
-par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
-DESeq2::plotPCA((summed_counts_filt),labels=FALSE,col=dev_stage)
-legend("topright",inset=c(-0.4,0),legend=unique(dev_stage), fill=dev_stage)
-dev.off()
+#png("plots/pca_raw_data.png", res=215, width = 1200, height=1000)
+#par(mar=c(5.1, 4.1, 4.1, 8.1), xpd=TRUE)
+#DESeq2::plotPCA((summed_counts_filt),labels=FALSE,col=dev_stage)
+#legend("topright",inset=c(-0.4,0),legend=unique(dev_stage), fill=dev_stage)
+#dev.off()
 
-?EDASeq::plotPCA
+

@@ -2,7 +2,7 @@
 
 set -o pipefail
 
-module load Trimmomatic/0.39-Java-1.8.0_144 > /dev/null 2>&1
+module load Trimmomatic/0.39-Java-13 > /dev/null 2>&1
 
 # arrayID (minimum for slurm is zero)
 if [[ "${QUEUE}" == "Slurm" ]]; then

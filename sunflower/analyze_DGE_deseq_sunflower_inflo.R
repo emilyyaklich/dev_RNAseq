@@ -6,17 +6,17 @@
 # need Functions.R written by ED
 
 
-setwd('/home/ely67071/sunflower_inflo_dev_analysis/')
+setwd('/home/ely67071/dev_RNAseq/')
 
 library(dplyr)
 library(ggplot2)
 library(UpSetR)
 library(Glimma)
-source("Functions.R")
+source("sunflower/Functions.R")
 
 # now analyze 
 # read in the data
-DEData_pairwise_cs<-ImportCSVs('deseq_results/combatseq/pairwise/',0.05)
+DEData_pairwise_cs<-ImportCSVs('sunflower/deseq_results/',0.05)
 # filter out significant results
 mydataSig_pairwise_cs<-lapply(DEData_pairwise_cs,SigDEdf,PvaluesCol=7,CritP=0.05)
 
@@ -27,7 +27,7 @@ lapply(SigOverlap_pairwise_cs,function(x) {length(x$Gene)})
 SigOverlapGraph_pairwise_cs<-lapply(mydataSig_pairwise_cs, function(x) {x$Gene})
 
 # create an upset plot of DE expression by pairwise dev_stage
-png("plots/sequential_pairwise_upset.png", res=215, width = 1800, height=1000)
+png("sunflower/plots/sequential_pairwise_upset.png", res=215, width = 1800, height=1000)
 upset(fromList(SigOverlapGraph_pairwise_cs),order.by="freq",nsets=13,nintersects=20, text.scale = 1.5)
 dev.off()
 
