@@ -25,6 +25,8 @@ adjusted_counts_deseq<-DESeqDataSetFromMatrix((adjusted_counts),colData = metada
 # run the DGE analysis
 DESeq_dataset_results_combatseq<-DESeq(adjusted_counts_deseq,parallel=TRUE)
 
+resultsNames(DESeq_dataset_results_combatseq)
+
 # save this because it will be read in to WGCNA (WGCNA takes all genes into account, but uses the normalization of DESeq)
 saveRDS(DESeq_dataset_results_combatseq, file='sunflower/deseq_results/deseq_dataset_results_pairwise_combatseq.RData')
 
@@ -38,3 +40,15 @@ write.csv(as.data.frame(result_10D_v_20D_combatseq), file='sunflower/deseq_resul
 write.csv(as.data.frame(result_20D_v_30D_combatseq), file='sunflower/deseq_results/result_20D_v_30D.csv')
 write.csv(as.data.frame(result_30D_v_35D_combatseq), file='sunflower/deseq_results/result_30D_v_35D.csv')
 
+
+# do the individual contrasts
+# look at results for each treatment
+results_10D<-results(DESeq_dataset_results_combatseq, alpha=0.05,name='dev_stage10D')
+results_20D<-results(DESeq_dataset_results_combatseq, alpha=0.05,name='dev_stage20D')
+results_30D<-results(DESeq_dataset_results_combatseq, alpha=0.05,name='dev_stage30D')
+results_35D<-results(DESeq_dataset_results_combatseq, alpha=0.05,name='dev_stage35D')
+
+write.csv(as.data.frame(results_10D), file='sunflower/deseq_results/indiv_res/result_10D.csv')
+write.csv(as.data.frame(results_20D), file='sunflower/deseq_results/indiv_res/result_20D.csv')
+write.csv(as.data.frame(results_30D), file='sunflower/deseq_results/indiv_res/result_30D.csv')
+write.csv(as.data.frame(results_35D), file='sunflower/deseq_results/indiv_res/result_35D.csv')
