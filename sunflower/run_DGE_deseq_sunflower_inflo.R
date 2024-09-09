@@ -31,14 +31,14 @@ resultsNames(DESeq_dataset_results_combatseq)
 saveRDS(DESeq_dataset_results_combatseq, file='sunflower/deseq_results/deseq_dataset_results_pairwise_combatseq.RData')
 
 # set up the pairwise contrasts (10v20, 20v30, 30v35)
-result_10D_v_20D_combatseq<-results(DESeq_dataset_results_combatseq,contrast=c("dev_stage","10D","20D"),alpha=0.05,parallel=TRUE)
-result_20D_v_30D_combatseq<-results(DESeq_dataset_results_combatseq,contrast=c("dev_stage","20D","30D"),alpha=0.05,parallel=TRUE)
-result_30D_v_35D_combatseq<-results(DESeq_dataset_results_combatseq,contrast=c("dev_stage","30D","35D"),alpha=0.05,parallel=TRUE)
+result_10D_v_20D_combatseq<-results(DESeq_dataset_results_combatseq,contrast=c("dev_stage","20D","10D"),alpha=0.05,parallel=TRUE)
+result_20D_v_30D_combatseq<-results(DESeq_dataset_results_combatseq,contrast=c("dev_stage","30D","20D"),alpha=0.05,parallel=TRUE)
+result_30D_v_35D_combatseq<-results(DESeq_dataset_results_combatseq,contrast=c("dev_stage","35D","30D"),alpha=0.05,parallel=TRUE)
 
 # write to CSV file
-write.csv(as.data.frame(result_10D_v_20D_combatseq), file='sunflower/deseq_results/result_10D_v_20D.csv')
-write.csv(as.data.frame(result_20D_v_30D_combatseq), file='sunflower/deseq_results/result_20D_v_30D.csv')
-write.csv(as.data.frame(result_30D_v_35D_combatseq), file='sunflower/deseq_results/result_30D_v_35D.csv')
+write.csv(as.data.frame(result_10D_v_20D_combatseq), file='sunflower/deseq_results/pairwise/result_10D_v_20D.csv')
+write.csv(as.data.frame(result_20D_v_30D_combatseq), file='sunflower/deseq_results/pairwise/result_20D_v_30D.csv')
+write.csv(as.data.frame(result_30D_v_35D_combatseq), file='sunflower/deseq_results/pairwise/result_30D_v_35D.csv')
 
 
 # do the individual contrasts

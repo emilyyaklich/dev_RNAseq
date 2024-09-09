@@ -11,9 +11,14 @@ library(DESeq2)
 library(WGCNA)
 library(tidyverse)
 library(BiocParallel)
+source("sunflower/Functions.R")
 
 # read in metadata
 metadata<-read.csv('sunflower/metadata.csv', row.names=1)
+
+#
+metadata$samples[1:4] <- paste0("X", metadata$samples[1:4])
+
 
 # read in deseq results (output from run_DGE_deseq_sunflower_inflo.R)
 # note this is reading in all of the data and is NOT filtered for genes that are
@@ -30,6 +35,8 @@ deseq_filt<-deseq[keep,]
 vsd <- vst(deseq_filt,blind=TRUE)
 vsd_matrix<-assay(vsd)
 
+
+?vst
 input_mat=t(vsd_matrix)
 vsd_matrix[1:5,1:10]
 
@@ -125,7 +132,109 @@ write_delim(module_df,file="sunflower/wgcna/gene_modules.txt", delim='\t')
 
 
 
+## Try running on differentially expressed genes only 
 
 
+# now analyze 
+# read in the data
+DEData_pairwise_cs<-ImportCSVs('sunflower/deseq_results/pairwise/',0.05)
+# filter out significant results
+mydataSig_pairwise_cs<-lapply(DEData_pairwise_cs,SigDEdf,PvaluesCol=7,CritP=0.05)
+
+
+
+
+# Initialize an empty vector to store gene names
+DE_genes <- c()
+
+# Loop through each dataframe in the list
+for (df in mydataSig_pairwise_cs) {
+  # Filter rows where padj < 0.05 and extract the gene names
+  filtered_genes <- df$Gene[df$padj < 0.05]
+  # Append the gene names to the vector
+  DE_genes <- c(DE_genes, filtered_genes)
+}
+
+# Get unique gene names
+DE_genes <- unique(DE_genes)
+
+subset_matrix <- vsd_matrix[rownames(vsd_matrix) %in% DE_genes, ]
+
+subset_df<-as.data.frame(subset_matrix)
+
+# Add gene names as a column
+subset_df$Gene <- rownames(subset_df)
+
+# Convert to long format
+long_format <- pivot_longer(subset_df, 
+                            cols = -Gene, 
+                            names_to = "Condition", 
+                            values_to = "Expression")
+
+
+vsd_df<-as.data.frame(vsd_matrix)
+
+# Add gene names as a column
+vsd_df$Gene <- rownames(vsd_df)
+
+# Create a matrix
+hclust_matrix <- vsd_df %>% 
+  dplyr::select(-Gene) %>% 
+  as.matrix()
+
+
+
+# assign rownames
+rownames(hclust_matrix) <- vsd_df$Gene
+hclust_matrix <- hclust_matrix[DE_genes, ]
+hclust_matrix<-t(hclust_matrix)
+
+# get traits of interest from metadata (aka Treatment)
+samples<-rownames(hclust_matrix)
+trait_rows<-match(samples, metadata$samples)
+datTraits<-metadata[trait_rows,-1]
+rownames(datTraits)<-metadata[trait_rows,1]
+
+# create treatment labels based after the outliers have been removed
+treatment_labels<-paste(metadata$Treatment,"-",metadata$Plant.)
+
+# see if there are global differences between samples 
+sampleTree_filt<-hclust(dist(hclust_matrix), method="average")
+sample_names<-rownames(hclust_matrix)
+
+# based on stage
+traitcolors<-labels2colors(metadata$dev_stage)
+plotDendroAndColors(sampleTree_filt,traitcolors)
+
+
+
+# ID power
+#allowWGCNAThreads()
+powers=c(c(1:10),seq(from=12, to=20, by=2))
+sft=pickSoftThreshold(input_mat_filt,powerVector = powers, verbose=5)
+
+
+par(mfrow=c(1,2))
+cex1=0.9
+plot(sft$fitIndices[,1],-sign(sft$fitIndices[,3])*sft$fitIndices[,2],xlab='Soft Threshold (power)',ylab='Scale Free Topology Model Fit, Signed R^2',main=paste("Scale independence"))
+
+text(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2], labels=powers, cex=cex1, col="red")
+abline(h=0.90, col="red")
+plot(sft$fitIndices[,1], sft$fitIndices[,5], xlab="Soft Threshold (power)",ylab="Mean Connectivity", type="n",main=paste("Mean connectivity"))
+text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1, col="red")
+
+picked_power=18
+temp_cor <- cor
+cor <- WGCNA::cor
+netwk <- blockwiseModules(hclust_matrix,power=picked_power,networkType = "signed", 
+                          deepSplit=2, pamRespectsDendro = F, minModuleSize = 30, 
+                          reassignThreshold = 0,mergeCutHeight = 0.25,
+                          saveTOMs = T, saveTOMFileBase = "cult",numericLabels = T, verbose=3,corType = "bicor"
+)
+
+mergedColors=labels2colors(netwk$colors)
+plotDendroAndColors(netwk$dendrograms[[1]],mergedColors[netwk$blockGenes[[1]]], "Module colors", dendroLabels = FALSE,hang=0.03, addGuide = TRUE,guideHang = 0.05)
+
+saveRDS(netwk,file='sunflower/wgcna/netwk_bicor_blocksize_default_differential_only.RData')
 
 

@@ -31,10 +31,16 @@ metadata$dev_stage<-factor(metadata$dev_stage)
 # create the model (wrt dev_stage)
 summed_counts<-DESeqDataSetFromMatrix(counts(summed_counts),colData = metadata, design=~0+dev_stage)
 
+
+summed_counts$samples
 # pre-filter for reads where at least 3 samples have a count of 1 or higher
 keep<-rowSums(counts(summed_counts)>=1)>=3
 length(which(keep==1))
 summed_counts_filt<-summed_counts[keep,]
+
+extracted_row <- subset(summed_counts, rownames(summed_counts) == 'g24641.t2')
+counts(extracted_row)
+
 
 # get a dataframe of the counts
 count_matrix <- as.matrix(counts(summed_counts_filt))

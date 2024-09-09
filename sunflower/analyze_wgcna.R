@@ -454,11 +454,65 @@ dev.off()
 
 
 
+#plot ATC individually
+# Subset the expression matrix based on the gene IDs
+subset_expression <- input_mat_filt_t["g24641.t1", ]
+subset_expression
+
+# Melt the data frame for plotting with ggplot2
+melted_data <- reshape2::melt(subset_expression, id.vars = "gene_id", variable.name = "dev_stage", value.name = "Expression")
+
+# Create a new dataframe with averaged values
+averaged_df <- melted_data %>%
+  rownames_to_column(var = "Label") %>%  # Convert row names to a column
+  mutate(Group = as.numeric(substr(gsub("[^0-9]", "", Label), 1, 2))) %>%  # Extract the numeric part from labels
+  group_by(Group) %>%
+  summarise(Average_Value = mean(Expression, na.rm = TRUE))
+
+# Plotting with ggplot2
+atc<-ggplot(averaged_df, aes(x = Group, y = Average_Value)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Expression Changes for ATC",
+       x = "dev_stage",
+       y = "Average Expression Count (DESeq2 norm)") +
+  scale_x_continuous(breaks = unique(averaged_df$Group))+
+  theme_minimal()
+
+png('sunflower/wgcna/plots/raw_expression/atc_plot.png', width=2000, height =2200, res=300)
+print(atc)
+dev.off()
 
 
+# g26711.t1
 
+# Subset the expression matrix based on the gene IDs
+subset_expression <- input_mat_filt_t["g42883.t1", ]
+subset_expression
 
+# Melt the data frame for plotting with ggplot2
+melted_data <- reshape2::melt(subset_expression, id.vars = "gene_id", variable.name = "dev_stage", value.name = "Expression")
 
+# Create a new dataframe with averaged values
+averaged_df <- melted_data %>%
+  rownames_to_column(var = "Label") %>%  # Convert row names to a column
+  mutate(Group = as.numeric(substr(gsub("[^0-9]", "", Label), 1, 2))) %>%  # Extract the numeric part from labels
+  group_by(Group) %>%
+  summarise(Average_Value = mean(Expression, na.rm = TRUE))
+
+# Plotting with ggplot2
+atc<-ggplot(averaged_df, aes(x = Group, y = Average_Value)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Expression Changes for PIN3 (g42883.t1)",
+       x = "dev_stage",
+       y = "Average Expression Count (DESeq2 norm)") +
+  scale_x_continuous(breaks = unique(averaged_df$Group))+
+  theme_minimal()
+
+png('sunflower/wgcna/plots/raw_expression/PIN3_g42883_plot.png', width=2000, height =2200, res=300)
+print(atc)
+dev.off()
 
 
 
@@ -699,11 +753,256 @@ color2gene %>% filter_all(any_vars(. %in% c("g957.t1"))) # turquoise
 
 
 
+# differential only
+
+
+# read in the network
+netwk<-readRDS("sunflower/wgcna/netwk_bicor_blocksize_default_differential_only.RData")
 
 
 
 
 
+# columns and rows of the matrix
+nGenes<-ncol(hclust_matrix)
+nsamples<-nrow(hclust_matrix)
+# turn the labels into colors
+mergedColors=labels2colors(netwk$colors)
+netwk$colors
+
+
+# create a table of module sizes
+module_sizes <- as.data.frame(table(mergedColors))
+module_sizes$mergedColors <-paste("ME", module_sizes$mergedColors,sep="")
+
+
+MEs0 <- moduleEigengenes(hclust_matrix, mergedColors)$eigengenes
+MEs <- orderMEs(MEs0)
+help("orderMEs")
 
 
 
+
+
+# Add rownames as a column
+df <- rownames_to_column(MEs, var = "samples")
+
+# Convert dataframe to long format
+df_long <- gather(df, key = "Column_Name", value = "Value", -samples)
+
+# Initialize an empty vector to store the new values
+dev_stage <- rep(NA, nrow(df_long))
+
+patterns_to_check <- c("10D", "20D", "30D", "35D")
+for (i in seq_along(df_long$samples)) {
+  for (pattern in patterns_to_check) {
+    if (grepl(pattern, df_long$samples[i])) {
+      # Assign the corresponding value based on the condition
+      if (pattern == "10D") {
+        dev_stage[i] <- "D10"
+      } else if (pattern == "20D") {
+        dev_stage[i] <- "D20"
+      } else if (pattern == "30D") {
+        dev_stage[i] <- "D30"
+      } else if (pattern == "35D") {
+        dev_stage[i] <- "D35"
+      }
+      # Break the loop once a match is found
+      break
+    }
+  }
+}
+
+# Add the new column to the dataframe
+df_long$dev_stage <- dev_stage
+
+
+
+
+# linear regression 
+# process the metadata
+
+metadata$dev_stage<-as.factor(make.names(metadata$dev_stage))
+levels(metadata$dev_stage)
+
+
+
+rownames(MEs) <- sub("^X", "", rownames(MEs))
+
+AllData<-merge(metadata[,c(1,2)], MEs, by.x="samples", by.y="row.names")
+
+
+# think about recoding this
+LR_Mod <- function(Yvar,dataset) {
+  mod <- lm(Yvar ~dev_stage,
+            data=dataset)
+  return(mod)
+}
+
+
+LR_mod_results <- lapply(AllData[,c(3:12)], function(x) {LR_Mod(x,AllData)})
+str(LR_mod_results)
+
+
+LR_mod_ANOVA <- lapply(LR_mod_results, function(x) {as.data.frame(Anova(x,test="F",type=2))})
+?Anova
+LR_mod_ANOVA$MEyellow
+# save f and p vals
+anova_columns <- lapply(LR_mod_ANOVA, function(x) {x[c(1),c(3,4)]})
+
+
+
+## testing out Kruskal Wallis test ##
+
+levels(AllData$dev_stage)
+
+LR_mod_ANOVA <- lapply(LR_mod_results, function(x) {as.data.frame(Anova(x,test="F",type=2))})
+
+
+
+#LR_Mod_np <- function(Yvar,dataset) {
+#  mod <- lm(rank(Yvar) ~dev_stage,
+#            data=dataset)
+ # return(mod)
+#}
+
+#LR_mod_results_np <- lapply(AllData[,c(3:57)], function(x) {LR_Mod_np(x,AllData)})
+
+#LR_mod_ANOVA_np <- lapply(LR_mod_results_np, function(x) {as.data.frame(Anova(x,test="F",type=2))})
+anova_columns <- lapply(LR_mod_ANOVA, function(x) {x[c(1),c(3,4)]})
+
+anova_wide<-lapply(anova_columns,function(x){as.data.frame(t(x))})
+anova_widewlabels<-lapply(names(anova_wide),function(x) {anova_wide[[x]]$Module <- x;return(anova_wide[[x]])} ) 
+
+#f vals
+anova_fvals <- lapply(anova_widewlabels, function(x) {x[1,]})
+
+# combine into 1 df
+all_fvals <- do.call("rbind", anova_fvals)
+colnames(all_fvals) <- c("dev_stage_f","Module")
+
+anova_pvals <- lapply(anova_widewlabels, function(x) {x[2,]})
+all_pvals <- do.call("rbind", anova_pvals)
+colnames(all_pvals) <- c("dev_stage_p","Module")
+
+anova_results <- merge(all_fvals, all_pvals, by="Module")
+
+
+### end of testing the KruskalL Wallace test 
+
+
+
+# adjust p-value using Bonferroni-Holm (also known as seqeuential bonferroni)
+all_pvals_adj<-lapply((anova_results[3]), function(x) {p.adjust(x, method="holm", n=length(x))})
+all_pvals_adj<-as.data.frame(do.call(cbind, all_pvals_adj))
+
+
+# LS means
+# for all modules
+mod_means<-lapply(LR_mod_results, function(x) {emmeans(x, ~dev_stage, type="response")})
+?emmeans
+
+#identical(mod_means,mod_means_test)
+mod_means_df<-lapply(mod_means, function(x) {as.data.frame(x)[,c(1:4)]})
+
+mod_means_w_labels<-lapply(names(mod_means_df), function(x) {mod_means_df[[x]]$Module <- x;return(mod_means_df[[x]])})
+all_mod_means<-do.call("rbind", mod_means_w_labels)
+
+
+
+all_mod_means_wide <-reshape(all_mod_means[,c(1:3,5)], idvar="Module", timevar = "dev_stage", direction="wide")
+
+# combine and save results
+
+all_results<-merge(anova_results, all_mod_means_wide, by="Module")
+
+
+# adjust p-value using Bonferroni-Holm (also known as seqeuential bonferroni)
+all_pvals_adj<-lapply((all_results[3]), function(x) {p.adjust(x, method="holm", n=length(x))})
+all_pvals_adj<-as.data.frame(do.call(cbind, all_pvals_adj))
+
+# rename columns
+colnames(all_pvals_adj) <- c("dev_stage_p_adj")
+
+# combine the dataframes
+all_results_adj<- cbind(all_results, all_pvals_adj)
+
+# turn the p-values into significance stars
+all_stars<-lapply((all_results_adj[12]), function(x) {stars.pval(x)})
+all_stars<-as.data.frame(do.call(cbind, all_stars))
+
+# name columns
+colnames(all_stars) <- c("dev_stage_stars")
+all_results_stars <- cbind(all_results_adj, all_stars)
+
+# set the stars as factors
+all_results_stars$dev_stage_stars<-factor(all_results_stars$dev_stage_stars, levels=c("***", "**",   "*",  " " ))
+
+
+# remove the NA
+all_results_stars[is.na(all_results_stars)] <- " "
+
+# sort the columns based on signficance (star levels)
+all_results_stars_sorted<-all_results_stars %>% arrange(dev_stage_stars)
+write.csv(all_results_stars_sorted, file="sunflower/wgcna/wgcna_anova_results_differential_only.csv", row.names=FALSE)
+
+# subset just the significant results from above
+all_results_stars_sorted_sig <- all_results_stars_sorted[ which(all_results_stars_sorted$dev_stage_p_adj < 0.05), ]
+
+# get a characterlist of just the significant modules names
+sig_modules<-all_results_stars_sorted_sig$Module
+
+
+all_data_sig<-AllData[sig_modules]
+all_data_sig$dev_stage<-paste0(AllData$dev_stage)
+
+# run t-test on all ANOVA significant results
+t_test<-lapply(all_data_sig, function(x) {pairwise.t.test(x, AllData$dev_stage, p.adj="holm")})
+print(t_test)
+
+
+t_test_all<-lapply(AllData[3:58], function(x) {pairwise.t.test(x, AllData$dev_stage, p.adj="holm")})
+print(t_test_all)
+t_test_all$MEturquoise
+
+# extract module names from the columns
+module_names<-(all_results_stars_sorted[,1])
+
+# loop through and create variables to plot each module
+plot_list<-list()
+i<-0
+for(module in module_names){
+  i <- i+1
+  
+  module_subset <-subset(all_results_stars_sorted, Module %in% module)
+  plotting_df<-data.frame(dev_stage=c("10D","20D","30D", "35D"), eigengene=c(module_subset$emmean.X10D, module_subset$emmean.X20D, module_subset$emmean.X30D, module_subset$emmean.X35D), se=c(module_subset$SE.X10D))
+  module_size=subset(module_sizes, mergedColors ==module)
+  plot_title<-paste(module_subset$Module, module_size$Freq, sep=": ")
+  dev_sig<-paste("pval: ", as.character(module_subset$dev_stage_stars))
+  plot_list[[i]]<-ggplot(data=plotting_df, aes(x=dev_stage, y=eigengene, group=1)) + geom_ribbon(aes(ymin = module_subset$SE.X10D/2, ymax = module_subset$SE.X10D/2), fill = "grey70") +
+    geom_line(size=1)+ geom_point(size=2)+ geom_errorbar(aes(x= dev_stage,ymin = eigengene-se, ymax = eigengene+se))+ ggtitle(plot_title) + annotate('text',x="35D",y=0.2,label=dev_sig, size =2)+ ylim(-0.5,0.5)+theme_bw() + theme(plot.title = element_text(size=8),axis.line=element_line(colour = "black"),
+                                                                                                                                                                                                                                     panel.grid.major=element_blank(),
+                                                                                                                                                                                                                                     panel.grid.minor = element_blank(),
+                                                                                                                                                                                                                                     panel.border=element_blank(),
+                                                                                                                                                                                                                                     panel.background = element_blank())
+  
+}
+
+
+
+# plot them in subsets (55 lots seems way too large)
+subset_1<-plot_list[1:12]
+png('sunflower/wgcna/plots/change_plots/subset_differential_only.png', width=2000, height =2200, res=300)
+plot_1 <- do.call(grid.arrange, subset_1)
+dev.off()
+
+
+hclust_matrix <- t(hclust_matrix)
+
+# match colors to gene name
+color2gene = data.frame(unlist(colnames(hclust_matrix)),unlist(mergedColors))
+color2gene$unlist.mergedColors. <- paste0("ME", color2gene$unlist.mergedColors.,sep="")
+color2gene_list_data <- split(color2gene, color2gene$unlist.mergedColors.)
+
+# CLV3
+color2gene %>% filter_all(any_vars(. %in% c("g23024.t1"))) # blue
