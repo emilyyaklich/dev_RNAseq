@@ -10,6 +10,8 @@ library(Glimma)
 library(sva)
 source("sunflower/Functions.R")
 
+
+packageVersion("ComBat_seq")
 # read in and process data
 
 setwd('/home/ely67071/dev_RNAseq/')

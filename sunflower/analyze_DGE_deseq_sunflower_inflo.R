@@ -13,9 +13,20 @@ library(ggplot2)
 library(UpSetR)
 library(Glimma)
 source("sunflower/Functions.R")
-library(DEGreport)
+?DEGreport
 
+
+browseVignettes("DEGreport")
 #devtools::install_git("https://git@git.bioconductor.org/packages/DEGreport")
+data(humanGender)
+library(SummarizedExperiment)
+library(ggplot2)
+ma <- assays(humanGender)[[1]][1:100,]
+
+des <- colData(humanGender)
+des[["other"]] <- sample(c("a", "b"), 85, replace = TRUE)
+
+
 
 # now analyze 
 # read in the data

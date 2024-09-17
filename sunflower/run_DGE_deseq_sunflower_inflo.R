@@ -10,6 +10,8 @@ library(Glimma)
 library(sva)
 source("sunflower/Functions.R")
 
+packageVersion("DESeq2")
+
 
 # read in and process data
 setwd('/home/ely67071/dev_RNAseq/')

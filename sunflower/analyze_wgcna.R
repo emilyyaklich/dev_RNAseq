@@ -30,7 +30,7 @@ source("sunflower/Functions.R")
 
 setwd('/home/ely67071/dev_RNAseq/')
 
-
+browseVignettes("DESeq2")
 # read in the cultivated metadata for wgcna
 metadata<-read.csv(file='sunflower/metadata.csv')
 
@@ -394,6 +394,7 @@ genes_in_module <- color2gene$unlist.colnames.input_mat_filt..[color2gene$unlist
 
 #plot CLV3 individually
 # Subset the expression matrix based on the gene IDs
+
 subset_expression <- input_mat_filt_t["g23024.t1", ]
 subset_expression
 
@@ -420,6 +421,42 @@ clv3<-ggplot(averaged_df, aes(x = Group, y = Average_Value)) +
 png('sunflower/wgcna/plots/raw_expression/clv3_plot.png', width=2000, height =2200, res=300)
 print(clv3)
 dev.off()
+
+
+
+
+
+
+
+
+# other random
+subset_expression <- input_mat_filt_t["g2492.t1", ]
+subset_expression
+
+# Melt the data frame for plotting with ggplot2
+melted_data <- reshape2::melt(subset_expression, id.vars = "gene_id", variable.name = "dev_stage", value.name = "Expression")
+
+# Create a new dataframe with averaged values
+averaged_df <- melted_data %>%
+  rownames_to_column(var = "Label") %>%  # Convert row names to a column
+  mutate(Group = as.numeric(substr(gsub("[^0-9]", "", Label), 1, 2))) %>%  # Extract the numeric part from labels
+  group_by(Group) %>%
+  summarise(Average_Value = mean(Expression, na.rm = TRUE))
+
+# Plotting with ggplot2
+clv3<-ggplot(averaged_df, aes(x = Group, y = Average_Value)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Expression Changes for other",
+       x = "dev_stage",
+       y = "Average Expression Count (DESeq2 norm)") +
+  scale_x_continuous(breaks = unique(averaged_df$Group))+
+  theme_minimal()
+
+print(clv3)
+
+
+
 
 
 # WUS
