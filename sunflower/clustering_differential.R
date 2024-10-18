@@ -35,9 +35,9 @@ deseq$samples
 
 
 # transform data into a matrix
-vsd <- vst(deseq,blind=TRUE)
+vsd <- vst(deseq,blind=FALSE)
 vsd_matrix<-assay(vsd)
-
+write.csv(vsd_matrix, "sunflower/deseq_results/normalized_counts_vst.csv")
 
 # now analyze 
 # read in the data
@@ -84,9 +84,9 @@ gene_hclust <- hclust(gene_dist, method = "complete")
 png("sunflower/plots/clustering_differential/hclust_tree_all_cuts.png", width=2700, height=2100, res=300)
 plot(gene_hclust, labels = FALSE)
 abline(h = 3.46, col = "red", lwd = 2)
+abline(h = 3.2, col = "purple", lwd = 2)
 abline(h = 3.1, col = "brown", lwd = 2)
-abline(h = 2.9, col = "blue", lwd = 2)# add horizontal line to illustrate cutting dendrogram
-abline(h = 2.7, col = "purple", lwd = 2)
+abline(h = 2.5, col = "blue", lwd = 2)# add horizontal line to illustrate cutting dendrogram
 abline(h = 2.3, col = "salmon", lwd = 2)
 abline(h = 1.5, col = "darkgreen", lwd = 2)
 abline(h = 0.4, col = "darkorange", lwd = 2)
@@ -95,7 +95,7 @@ dev.off()
 
 
 png("sunflower/plots/clustering_differential/hclust_tree.png", width=2700, height=2100, res=300)
-plot(gene_hclust, labels = FALSE)
+plot(gene_hclust{1:20}, labels = FALSE)
 abline(h = 3.1, col = "brown", lwd = 2)
 dev.off()
 
@@ -114,6 +114,20 @@ gene_cluster_df <- enframe(gene_cluster)
 names(gene_cluster_df) <- c("Gene", "cluster")
 
 
+# Check which clusters contain specific genes (WUS and CLV3)
+specific_genes <- c("g51546.t1", "g23024.t1")  # WUS and CLV3
+clusters_with_genes <- gene_cluster_df %>%
+  filter(Gene %in% specific_genes) %>%
+  select(Gene, cluster)
+
+# Print the clusters for specific genes
+wus_cluster <- clusters_with_genes %>% filter(Gene == "g51546.t1") %>% pull(cluster)
+clv_cluster <- clusters_with_genes %>% filter(Gene == "g23024.t1") %>% pull(cluster)
+
+
+print(paste("WUS: Cluster", wus_cluster))
+print(paste("CLV3: Cluster", clv_cluster))
+
 average_expression_df<-as.data.frame(scaled_expression_matrix)
 # Add gene names as a column
 average_expression_df$Gene <- rownames(scaled_expression_matrix)
@@ -121,6 +135,9 @@ average_expression_df$Gene <- rownames(scaled_expression_matrix)
 
 df_cluster <- average_expression_df %>% 
   inner_join(gene_cluster_df, by = "Gene")
+
+#write.csv(df_cluster, file = "sunflower/deseq_results/clustering/clustering_data_3_1.csv", row.names = FALSE)
+
 
 df_long <- df_cluster %>%
   pivot_longer(cols = starts_with(c("D")), names_to = "samples", values_to = "Expression")
@@ -176,8 +193,87 @@ dev.off()
 
 
 
+# Define the updated heights at which to cut the tree
+cut_heights <- c(3.46, 3.3, 3.1, 2.5, 2.3, 1.5, 0.4)
 
+# Define colors for average lines based on cut heights
+average_line_colors <- c(
+  "3.46" = "red",       # for cut height 3.46
+  "3.3"  = "purple",    # for cut height 3.3
+  "3.1"  = "brown",     # for cut height 3.1
+  "2.5"  = "blue",      # for cut height 2.5
+  "2.3"  = "salmon",    # for cut height 2.3
+  "1.5"  = "darkgreen", # for cut height 1.5
+  "0.4"  = "darkorange" # for cut height 0.4
+)
+output_dir <- "sunflower/plots/clustering_differential/"
 
+# Loop through each height to cut the tree and plot
+for (i in seq_along(cut_heights)) {
+  h <- cut_heights[i]
+  
+  # Cut the dendrogram at the specified height
+  gene_cluster <- cutree(gene_hclust, h = h)
+  gene_cluster_df <- enframe(gene_cluster)
+  
+  # Rename columns
+  names(gene_cluster_df) <- c("Gene", "cluster")
+  
+  
+  
+  
+  # Check which clusters contain specific genes (WUS and CLV3)
+  specific_genes <- c("g51546.t1", "g23024.t1")  # WUS and CLV3
+  clusters_with_genes <- gene_cluster_df %>%
+    filter(Gene %in% specific_genes) %>%
+    select(Gene, cluster)
+  
+  # Print the clusters for specific genes
+  wus_cluster <- clusters_with_genes %>% filter(Gene == "g51546.t1") %>% pull(cluster)
+  clv_cluster <- clusters_with_genes %>% filter(Gene == "g23024.t1") %>% pull(cluster)
+  
+  print(paste("Cut Height:", h))
+  print(paste("WUS: Cluster", wus_cluster))
+  print(paste("CLV3: Cluster", clv_cluster))
+  
+  
+  
+  # Prepare average expression data
+  average_expression_df <- as.data.frame(scaled_expression_matrix)
+  average_expression_df$Gene <- rownames(scaled_expression_matrix)
+  
+  # Join data frames
+  df_cluster <- average_expression_df %>% 
+    inner_join(gene_cluster_df, by = "Gene")
+  
+  # Write clustering data to CSV
+  write.csv(df_cluster, file = paste0("sunflower/deseq_results/clustering/", "clustering_data_", h, ".csv"), row.names = FALSE)
+  
+  # Reshape data for plotting
+  df_long <- df_cluster %>%
+    pivot_longer(cols = starts_with(c("D")), names_to = "samples", values_to = "Expression")
+  
+  # Ensure `samples` is numeric
+  df_long$samples <- as.numeric(gsub("D", "", df_long$samples))
+  
+  # Construct the file name for the plot
+  plot_file <- paste0(output_dir, "hclust_clusters_", h, "_cut.png")
+  
+  # Plotting using ggplot
+  p <- ggplot(df_long, aes(x = samples, y = Expression, group = Gene)) +
+    geom_line(aes(color = average_line_colors[as.character(h)]), show.legend = FALSE) +  # Set color for all lines
+    geom_line(stat = "summary", fun = "mean", size = 1.5, color = average_line_colors[as.character(h)]) +  # Average line
+    labs(
+      title = paste("Clustered Expression Data (Cut Height =", h, ")"),
+      x = "Developmental Stage",
+      y = "Scaled Expression"
+    ) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
+  # Save the plot using ggsave
+  ggsave(plot_file, plot = p, width = 2700/300, height = 2100/300, dpi = 300)
+}
 
 
 
@@ -195,7 +291,7 @@ dev.off()
 
 
 # Specify the clusters of interest
-clusters_of_interest <- c("94", "41")  # Replace with your cluster IDs
+clusters_of_interest <- c("12", "91")  # Replace with your cluster IDs
 
 # Subset the data to include only the clusters of interest
 df_subset <- df_long %>%
