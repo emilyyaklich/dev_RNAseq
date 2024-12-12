@@ -5,7 +5,7 @@
 # Description: Will run go analysis with result from run_DGE_deseq_cult_only.R
 # need Functions.R written by ED
 
-setwd('/home/ely67071/sunflower_stress_analysis/')
+setwd('/home/ely67071/dev_RNAseq/sunflower')
 
 
 
@@ -19,7 +19,7 @@ library(stringr)
 library(data.table)
 source("Functions.R")
 
-ha412_genes<-read.table("Ha412GO_terms_interpro_aa_slim.txt", fill=T)
+ha412_genes<-read.table("Ha412GO_terms_interpro_b3.txt", fill=T)
 colnames(ha412_genes)<-c("parent", "ontology_term")
 ha412_genes$ontology_term<-as.character(ha412_genes$ontology_term)
 go_mapping<-separate_rows(ha412_genes, ontology_term, sep=",")
@@ -28,7 +28,7 @@ goseq_term_input<-split(unique_go_mapping$parent, unique_go_mapping$ontology_ter
 
 
 #go_mapping<-go_mapping %>% drop_na()
-DEData_treatment<-ImportCSVs('cult/treatment/',0.05)
+DEData_treatment<-ImportCSVs('deseq_results/pairwise/',0.05)
 all_genes<-lapply(DEData_treatment, function(x) {x$Gene})
 
 
@@ -36,7 +36,7 @@ test<-intersect(all_genes$combo, ha412_genes$parent)
 
 # read in transcript length and make sure transcript length is the same as all genes
 transcript_length<-read.table("transcript_length.csv")
-tl_subset<-subset(transcript_length, ID %in% all_genes$combo)
+tl_subset<-subset(transcript_length, ID %in% all_genes$result_10D_v_20D)
 all_genes_subset<-lapply(all_genes,function(x) {x[x %in% transcript_length$ID]})
 
 
@@ -45,24 +45,40 @@ all_genes_subset<-lapply(all_genes,function(x) {x[x %in% transcript_length$ID]})
 mydataSig_treatment<-lapply(DEData_treatment,SigDEdf,PvaluesCol=7,CritP=0.05)
 sig_genes<-lapply(mydataSig_treatment, function(x) {x$Gene})
 sig_genes_subset<-lapply(sig_genes,function(x) {x[x %in% transcript_length$ID]})
+all_genes_subset$
+
+  
+GO_Enrichment  
+  
+test2<-GO_Enrichment(all_genes_subset$result_10D_v_20D,sig_genes_subset$result_10D_v_20D,tl_subset,goseq_term_input)
+
+common <- intersect(all_genes_subset$), LengthTable[,1])
+LengthTable <- as.data.frame(LengthTable[LengthTable[,1] %in% common, ]) #"all" genes
+LengthTable <- LengthTable[order(LengthTable[,1]),] #order by gene ID
+gene.vector=as.integer(AllGenes %in% DE_Genes)
+names(gene.vector)=AllGenes
+pwf <- nullp(gene.vector, bias.data = LengthTable[,2])
+GO.wall <- goseq(pwf, gene2cat = GO_Terms)
+enriched.GO=GO.wall$category[p.adjust(GO.wall$over_represented_pvalue, method="BH")<.05]
+enrichedGO_table <- GO.wall[is.element(GO.wall$category, enriched.GO),]
 
 
-high_salt_go<-GO_Enrichment(all_genes_subset$HighSalt,sig_genes_subset$HighSalt,tl_subset,goseq_term_input)
-high_salt_go_separate<-separate_rows(high_salt_go,category,sep=",")
-write.csv(as.data.frame(high_salt_go_separate), file='go_results/go_highsalt.csv')
+
+high_salt_go_separate<-separate_rows(test2,category,sep=",")
+write.csv(as.data.frame(high_salt_go_separate), file='go_analysis/deg/10_v20.csv')
+high_salt_go
 
 
-
-low_nut_go<-GO_Enrichment(all_genes_subset$LowNut,sig_genes_subset$LowNut,tl_subset,goseq_term_input)
+low_nut_go<-GO_Enrichment(all_genes_subset$result_20D_v_30D,sig_genes_subset$result_20D_v_30D,tl_subset,goseq_term_input)
 low_nut_go$category
 low_nut_go_separate<-separate_rows(low_nut_go,category,sep=",")
-write.csv(as.data.frame(low_nut_go_separate), file='go_results/go_lownut.csv')
+write.csv(as.data.frame(low_nut_go_separate), file='go_analysis/deg/20_v30.csv')
 
 
-combo_go<-GO_Enrichment(all_genes_subset$combo,sig_genes_subset$combo,tl_subset,goseq_term_input)
+combo_go<-GO_Enrichment(all_genes_subset$result_30D_v_35D,sig_genes_subset$result_30D_v_35D,tl_subset,goseq_term_input)
 combo_go$category
-#combo_go_separate<-separate_rows(combo_go,category,sep=",")
-write.csv(as.data.frame(combo_go), file='go_results/go_combo.csv')
+combo_go_separate<-separate_rows(combo_go,category,sep=",")
+write.csv(as.data.frame(combo_go), file='go_analysis/deg/30_v35.csv')
 all.equal(combo_go,combo_go_separate)
 
 
