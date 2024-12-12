@@ -152,14 +152,14 @@ dev.off()
 
 
 # colored upset...no legend
-png("plots/up_AND_down_white_stripe_no_legend_DGE.png", width=2700, height=2100, res=300)
+png("sunflower/plots/up_AND_down_white_stripe_no_legend_DGE.png", width=2700, height=2100, res=300)
 ComplexUpset::upset(mydataSig_plot,
                     treatments,name="Treatment",stripes="white",
                     base_annotations=list
                     ("Number of Intersecting Genes"=intersection_size
                       (counts=TRUE,mapping=aes(fill=Direction))
                       +scale_fill_manual(
-                        values=c('Up'='goldenrod','Down'='#D55E00','Difference'='#40B0A6'), guide="none")+scale_y_continuous(expand=expansion(mult=c(0,0.1)))+theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank()
+                        values=c('Up'='#009E73','Down'='#D55E00','Difference'='#CC79A7'), guide="none")+scale_y_continuous(expand=expansion(mult=c(0,0.1)))+theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank()
                                                                                                                                                                     ,axis.line=element_line(colour='black'))),
                     set_sizes=upset_set_size(geom=geom_bar(width = 0.4))+theme(axis.line.x = element_line(colour = 'black'),axis.ticks.x =element_line() ),
                     themes=upset_modify_themes(list('intersections_matrix'=theme(text=element_text(size=15)))))

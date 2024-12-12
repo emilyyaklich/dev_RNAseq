@@ -26,6 +26,10 @@ metadata$samples[1:4] <- paste0("X", metadata$samples[1:4])
 deseq <- readRDS('sunflower/deseq_results/deseq_dataset_results_pairwise_combatseq.RData')
 deseq$samples
 
+
+
+?assay
+
 # pre-filter for reads where at least 10 samples have a count of 10 or higher
 keep<-rowSums(counts(deseq)>=10)>=10
 length(which(keep==1))

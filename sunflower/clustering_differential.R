@@ -23,7 +23,7 @@ library(cluster)
 library(dynamicTreeCut)
 #install.packages("fpc")
 library(fpc)
-
+?hclust
 # read in metadata
 metadata<-read.csv('sunflower/metadata.csv', row.names=1)
 
@@ -43,9 +43,9 @@ write.csv(vsd_matrix, "sunflower/deseq_results/normalized_counts_vst.csv")
 # read in the data
 DEData_pairwise_cs<-ImportCSVs('sunflower/deseq_results/pairwise/',0.05)
 # filter out significant results
-mydataSig_pairwise_cs<-lapply(DEData_pairwise_cs,SigDEdf,PvaluesCol=7,CritP=0.05)
+mydataSig_pairwise_cs<-lapply(DEData_pairwiseq_cs,SigDEdf,PvaluesCol=7,CritP=0.05)
 
-
+view(mydataSig_pairwise_cs$result_20D_v_30D)
 
 # Initialize an empty vector to store gene names
 DE_genes <- c()
@@ -60,6 +60,8 @@ for (df in mydataSig_pairwise_cs) {
 
 # Get unique gene names
 DE_genes <- unique(DE_genes)
+
+"g9915.t1" %in% DE_genes
 
 subset_matrix <- vsd_matrix[rownames(vsd_matrix) %in% DE_genes, ]
 
@@ -95,16 +97,16 @@ dev.off()
 
 
 png("sunflower/plots/clustering_differential/hclust_tree.png", width=2700, height=2100, res=300)
-plot(gene_hclust{1:20}, labels = FALSE)
+plot(gene_hclust, labels = FALSE)
 abline(h = 3.1, col = "brown", lwd = 2)
 dev.off()
 
 
 
 # plot tree heights
-png("sunflower/plots/clustering_differential/hclust_treeheights.png", width=2700, height=2100, res=300)
+png("sunflower/plots/clustering_differential/hclust_treeheights_subset.png", width=2700, height=2100, res=300)
 heights<-sort(gene_hclust$height, decreasing = TRUE)
-plot(heights, type="p", xlab = "Number of Clusters", ylab= "Tree Cut Position")
+plot(heights[1:20], type="p", xlab = "Number of Clusters", ylab= "Tree Cut Position")
 dev.off()
 
 
@@ -136,7 +138,7 @@ average_expression_df$Gene <- rownames(scaled_expression_matrix)
 df_cluster <- average_expression_df %>% 
   inner_join(gene_cluster_df, by = "Gene")
 
-#write.csv(df_cluster, file = "sunflower/deseq_results/clustering/clustering_data_3_1.csv", row.names = FALSE)
+write.csv(df_cluster, file = "sunflower/deseq_results/clustering/clustering_data_3_1.csv", row.names = FALSE)
 
 
 df_long <- df_cluster %>%
@@ -174,10 +176,10 @@ df_long$samples <- as.numeric(gsub("D", "", df_long$samples))
 
 
 # Plotting
-png("sunflower/plots/clustering_differential/hclust_clusters_3_1_cut.png", width=2700, height=2100, res=300)
+png("sunflower/plots/clustering_differential/hclust_clusters_0_4_cut.png", width=2700, height=2100, res=300)
 ggplot(df_long, aes(x = samples, y = Expression, group = Gene)) +
   geom_line() +
-  geom_line(stat = "summary", fun = "mean", color = "brown", size = 1.5, aes(group = 1)) +
+  geom_line(stat = "summary", fun = "mean", color = "darkorange", size = 1.5, aes(group = 1)) +
   facet_wrap(~ cluster, labeller = labeller(cluster = facet_labels)) +
   scale_x_continuous(
     breaks = c(10, 20, 30, 35),
@@ -190,6 +192,15 @@ ggplot(df_long, aes(x = samples, y = Expression, group = Gene)) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 dev.off()
+
+
+
+
+
+
+
+
+
 
 
 

@@ -8,13 +8,16 @@ library(dplyr)
 library(DESeq2)
 library(Glimma)
 library(sva)
+
+# read in and process data
+setwd('/home/ely67071/dev_RNAseq/')
+
 source("sunflower/Functions.R")
 
 packageVersion("DESeq2")
 
 
-# read in and process data
-setwd('/home/ely67071/dev_RNAseq/')
+
 adjusted_counts<-read.csv('sunflower/adjusted_counts_combatseq.csv', row.names=1)
 metadata<-read.csv('sunflower/metadata.csv', row.names=1)
 # create the factors of interest
@@ -26,6 +29,14 @@ adjusted_counts_deseq<-DESeqDataSetFromMatrix((adjusted_counts),colData = metada
 
 # run the DGE analysis
 DESeq_dataset_results_combatseq<-DESeq(adjusted_counts_deseq,parallel=TRUE)
+
+
+
+normalized_counts<-counts(DESeq_dataset_results_combatseq, normalized=TRUE)
+write.csv(normalized_counts, "sunflower/deseq_results/normalized_counts_size_factor.csv")
+
+
+
 
 resultsNames(DESeq_dataset_results_combatseq)
 
