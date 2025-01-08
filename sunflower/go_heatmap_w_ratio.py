@@ -9,6 +9,8 @@ import functools as ft
 import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.ticker as tkr
+from matplotlib.colors import LinearSegmentedColormap
+
 
 
 def go_gene_assoc(go_result, go_gene_mapping, deseq_results):
@@ -170,12 +172,34 @@ ratio_30v35 = calculate_up_fraction(result_30v35)
 # create a dataframe that contains info at the intersection of all the GO terms between treatments
 all_go = prepare_go_heatmap_ratio(go_10v20,go_20v30,go_30v35, "10v20", "20v30", "30v35", ratio_10v20, ratio_20v30,ratio_30v35)
 # plot the heat map
+# decided not to use custom scale
+#custom_cmap = LinearSegmentedColormap.from_list('up_down', ["#009E73", "#D55E00"])
 formatter = tkr.ScalarFormatter(useMathText=True)
 formatter.set_scientific(True)
 formatter.set_powerlimits((-2, 2))
 labels = list(all_go.index.values)
 plt.figure(figsize=(12, 8))
-go_terms = sns.heatmap(all_go, cbar_kws={'format': formatter}, yticklabels=labels)
-go_terms.figure.savefig(wd + 'go_heatmap_ratio.png', dpi='figure', format="png", bbox_inches='tight')
+go_terms = sns.heatmap(all_go, cbar_kws={'format': formatter}, yticklabels=labels, cmap="PRGn")
+go_terms.figure.savefig(wd + 'go_heatmap_ratio_PAG.png', dpi='figure', format="png", bbox_inches='tight')
 plt.close()
 
+
+# add the gene to the excel files
+# List of DataFrames and their names
+dataframes = [("10v20", go_10v20, result_10v20), ("20v30", go_20v30, result_20v30), ("30v35", go_30v35, result_30v35)]
+
+# Drop the "Unnamed: 0" column if it exists
+for sheet_name, df, _ in dataframes:
+    if "Unnamed: 0" in df.columns:
+        df.drop(columns=["Unnamed: 0"], inplace=True)
+
+for sheet_name, df, nested_dict in dataframes:
+    df["genes"] = df["category"].map(lambda x: nested_dict.get(x, {}).get("genes", []))
+
+# Combine into one Excel file
+output_file = wd +"go_enrichment_pairwise_12-19-2024.xlsx"
+with pd.ExcelWriter(output_file, engine='xlsxwriter') as writer:
+    for sheet_name, df, _ in dataframes:
+        df.to_excel(writer, sheet_name=sheet_name, index=False)
+
+print(f"DataFrames have been written to {output_file}.")
