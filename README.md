@@ -31,6 +31,8 @@ A directory containing your files to be analyzed must be specified in the config
 After quality has been assessed for each sample, the FastQC results will be summarized using MultiQC. These summary statistics will be located in the output directory specified in the config file.
 
 ## Step 2: Adapter_Trimming
+### Make sure to check if you sequence data has adapters trimmed (from step above). If they are already trimmed, continue to step 3.
+
 The Adapter_Trimming handler uses Trimmomatic to trim adapter sequences from FastQ files. Trimmomatic takes paired-end information into account when doing so (if applicable).
 
 The Adapter_Trimming handler can accept as input EITHER a directory (which can be to multiple sub-directories for each sample) or a text-file list of forward samples (it will find the reverse samples based on the naming suffix specified in the config file)
