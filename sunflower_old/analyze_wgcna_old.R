@@ -104,7 +104,7 @@ LR_Mod <- function(Yvar,dataset) {
 }
 
 
-LR_mod_results <- lapply(AllData[,c(3:55)], function(x) {LR_Mod(x,AllData)})
+LR_mod_results <- lapply(AllData[,c(3:57)], function(x) {LR_Mod(x,AllData)})
 str(LR_mod_results)
 
 
@@ -241,7 +241,7 @@ t_test<-lapply(all_data_sig, function(x) {pairwise.t.test(x, AllData$dev_stage, 
 print(t_test)
 
 
-t_test_all<-lapply(AllData[3:55], function(x) {pairwise.t.test(x, AllData$dev_stage, p.adj="holm")})
+t_test_all<-lapply(AllData[3:58], function(x) {pairwise.t.test(x, AllData$dev_stage, p.adj="holm")})
 print(t_test_all)
 t_test_all$MEturquoise
 
@@ -282,7 +282,6 @@ ggplot(data=plotting_df, aes(x=dev_stage, y=eigenval, group=1)) +
 
 
 
-
 # print individual plots
 j<-0
 for (module in module_names) {
@@ -315,7 +314,7 @@ png('sunflower/wgcna/plots/change_plots/subset4_w_error.png', width=2000, height
 plot_4<-do.call(grid.arrange, subset_4)
 dev.off()
 
-subset_5 <- plot_list[49:57]
+subset_5 <- plot_list[49:55]
 png('sunflower/wgcna/plots/change_plots/subset5_w_error.png', width=2000, height =2200, res=300)
 plot_5<-do.call(grid.arrange, subset_5)
 dev.off()
@@ -580,16 +579,10 @@ write.csv(unique_go_test3, "wgcna/go_module_data.csv")
 # find genes of interest
 
 # CLV3
-color2gene %>% filter_all(any_vars(. %in% c("g23024.t1"))) # blue
+color2gene %>% filter_all(any_vars(. %in% c("MSTRG.8822"))) # turquoise
 
 # WUS
-color2gene %>% filter_all(any_vars(. %in% c("g51546.t1"))) # blue
-
-#AGL
-color2gene %>% filter_all(any_vars(. %in% c("g56393.t1"))) # blue
-
-
-
+color2gene %>% filter_all(any_vars(. %in% c("MSTRG.19283"))) # turquoise
 
 # UFO
 color2gene %>% filter_all(any_vars(. %in% c("MSTRG.11819")))

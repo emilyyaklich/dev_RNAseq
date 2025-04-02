@@ -24,8 +24,6 @@ library(dynamicTreeCut)
 #install.packages("fpc")
 library(fpc)
 ?hclust
-
-?stats
 # read in metadata
 metadata<-read.csv('sunflower/metadata.csv', row.names=1)
 
@@ -88,33 +86,31 @@ gene_hclust <- hclust(gene_dist, method = "complete")
 png("sunflower/plots/clustering_differential/hclust_tree_all_cuts.png", width=2700, height=2100, res=300)
 plot(gene_hclust, labels = FALSE)
 abline(h = 3.46, col = "red", lwd = 2)
-abline(h = 3.3, col = "purple", lwd = 2)
-abline(h = 3.0, col = "brown", lwd = 2)
-abline(h = 2.7, col = "blue", lwd = 2)# add horizontal line to illustrate cutting dendrogram
-abline(h = 2.4, col = "salmon", lwd = 2)
-abline(h = 2.0, col = "darkgreen", lwd = 2)
-abline(h = 1.5, col = "darkorange", lwd = 2)
-abline(h = 1.0, col = "yellow", lwd = 2)
-abline(h = 0.1, col = "magenta", lwd = 2)
+abline(h = 3.2, col = "purple", lwd = 2)
+abline(h = 3.1, col = "brown", lwd = 2)
+abline(h = 2.5, col = "blue", lwd = 2)# add horizontal line to illustrate cutting dendrogram
+abline(h = 2.3, col = "salmon", lwd = 2)
+abline(h = 1.5, col = "darkgreen", lwd = 2)
+abline(h = 0.4, col = "darkorange", lwd = 2)
 dev.off()
 
 
 
-png("sunflower/plots/clustering_differential/hclust_tree_2_7.png", width=2700, height=2100, res=300)
+png("sunflower/plots/clustering_differential/hclust_tree.png", width=2700, height=2100, res=300)
 plot(gene_hclust, labels = FALSE)
-abline(h = 2.7, col = "brown", lwd = 2)
+abline(h = 3.1, col = "brown", lwd = 2)
 dev.off()
 
 
 
 # plot tree heights
-png("sunflower/plots/clustering_differential/hclust_treeheights.png", width=2700, height=2100, res=300)
+png("sunflower/plots/clustering_differential/hclust_treeheights_subset.png", width=2700, height=2100, res=300)
 heights<-sort(gene_hclust$height, decreasing = TRUE)
-plot(heights, type="p", xlab = "Number of Clusters", ylab= "Tree Cut Position")
+plot(heights[1:20], type="p", xlab = "Number of Clusters", ylab= "Tree Cut Position")
 dev.off()
 
 
-gene_cluster <- cutree(gene_hclust, h=2.7)
+gene_cluster <- cutree(gene_hclust, h=3.1)
 gene_cluster_df <- enframe(gene_cluster)
 # Using base R to rename columns
 names(gene_cluster_df) <- c("Gene", "cluster")
@@ -198,6 +194,8 @@ ggplot(df_long, aes(x = samples, y = Expression, group = Gene)) +
 dev.off()
 
 
+
+
 # PLOT FOR PAG
 summary_data <- df_long %>%
   group_by(samples, cluster) %>%
@@ -236,20 +234,21 @@ dev.off()
 
 
 
+
+
+
 # Define the updated heights at which to cut the tree
-cut_heights <- c(3.46, 3.3, 3.0, 2.7, 2.4,2.0, 1.5, 1.0, 0.1)
+cut_heights <- c(3.46, 3.3, 3.1, 2.5, 2.3, 1.5, 0.4)
 
 # Define colors for average lines based on cut heights
 average_line_colors <- c(
   "3.46" = "red",       # for cut height 3.46
   "3.3"  = "purple",    # for cut height 3.3
-  "3.0"  = "blue",     # for cut height 3.1
-  "2.7"  = "brown",      # for cut height 2.5
-  "2.4"  = "salmon",    # for cut height 2.3
-  "2.0"  = "darkgreen", # for cut height 1.5
-  "1.5"  = "darkorange", # for cut height 0.4
-  "1.0" = "yellow",
-  "0.1" = "magenta"
+  "3.1"  = "brown",     # for cut height 3.1
+  "2.5"  = "blue",      # for cut height 2.5
+  "2.3"  = "salmon",    # for cut height 2.3
+  "1.5"  = "darkgreen", # for cut height 1.5
+  "0.4"  = "darkorange" # for cut height 0.4
 )
 output_dir <- "sunflower/plots/clustering_differential/"
 
@@ -263,6 +262,8 @@ for (i in seq_along(cut_heights)) {
   
   # Rename columns
   names(gene_cluster_df) <- c("Gene", "cluster")
+  
+  
   
   
   # Check which clusters contain specific genes (WUS and CLV3)
@@ -280,7 +281,7 @@ for (i in seq_along(cut_heights)) {
   print(paste("CLV3: Cluster", clv_cluster))
   
   
-
+  
   # Prepare average expression data
   average_expression_df <- as.data.frame(scaled_expression_matrix)
   average_expression_df$Gene <- rownames(scaled_expression_matrix)
@@ -296,39 +297,23 @@ for (i in seq_along(cut_heights)) {
   df_long <- df_cluster %>%
     pivot_longer(cols = starts_with(c("D")), names_to = "samples", values_to = "Expression")
   
-  cluster_gene_count <- df_long %>%
-    group_by(cluster) %>%
-    summarise(number_of_genes = n_distinct(Gene))
-  
-  # Create a named vector for facet labels
-  facet_labels <- cluster_gene_count %>%
-    mutate(label = paste("Cluster", cluster, ":", number_of_genes)) %>%
-    pull(label, name = cluster)
-  
-  # Ensure facet_labels is a named vector
-  facet_labels <- setNames(facet_labels, cluster_gene_count$cluster)
-  
-  
   # Ensure `samples` is numeric
   df_long$samples <- as.numeric(gsub("D", "", df_long$samples))
-  
   
   # Construct the file name for the plot
   plot_file <- paste0(output_dir, "hclust_clusters_", h, "_cut.png")
   
   # Plotting using ggplot
   p <- ggplot(df_long, aes(x = samples, y = Expression, group = Gene)) +
-    geom_line() +  # Set color for all lines
-    geom_line(stat = "summary", fun = "mean", size = 1.5, color = average_line_colors[as.character(format(h, nsmall=1))], aes(group = 1)) +  # Average line
-    facet_wrap(~ cluster, labeller = labeller(cluster = facet_labels)) +
+    geom_line(aes(color = average_line_colors[as.character(h)]), show.legend = FALSE) +  # Set color for all lines
+    geom_line(stat = "summary", fun = "mean", size = 1.5, color = average_line_colors[as.character(h)]) +  # Average line
     labs(
       title = paste("Clustered Expression Data (Cut Height =", h, ")"),
       x = "Developmental Stage",
       y = "Scaled Expression"
     ) +
     theme_minimal() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1) + scale_y_continuous(limits = c(min(df_long$Expression, na.rm = TRUE), max(df_long$Expression, na.rm = TRUE)))
-)
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
   
   # Save the plot using ggsave
   ggsave(plot_file, plot = p, width = 2700/300, height = 2100/300, dpi = 300)
@@ -344,11 +329,13 @@ for (i in seq_along(cut_heights)) {
 
 
 
+
+
 # just show two clusters CLV3 is in for the lowest cut
 
 
 # Specify the clusters of interest
-clusters_of_interest <- c("558", "126")  # Replace with your cluster IDs
+clusters_of_interest <- c("12", "91")  # Replace with your cluster IDs
 
 # Subset the data to include only the clusters of interest
 df_subset <- df_long %>%
@@ -369,7 +356,7 @@ facet_labels_subset <- setNames(facet_labels_subset, cluster_gene_count_subset$c
 df_subset$samples <- as.numeric(gsub("D", "", df_subset$samples))
 
 # Plotting
-png("sunflower/plots/clustering_differential/hclust_clusters_0_1_cut_subset.png", width=2700, height=2100, res=300)
+png("sunflower/plots/clustering_differential/hclust_clusters_0_4_cut_subset.png", width=2700, height=2100, res=300)
 ggplot(df_subset, aes(x = samples, y = Expression, group = Gene)) +
   geom_line() +
   geom_line(stat = "summary", fun = "mean", color = "darkorange", size = 1.5, aes(group = 1)) +

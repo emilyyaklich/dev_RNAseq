@@ -104,7 +104,7 @@ LR_Mod <- function(Yvar,dataset) {
 }
 
 
-LR_mod_results <- lapply(AllData[,c(3:55)], function(x) {LR_Mod(x,AllData)})
+LR_mod_results <- lapply(AllData[,c(3:59)], function(x) {LR_Mod(x,AllData)})
 str(LR_mod_results)
 
 
@@ -241,7 +241,7 @@ t_test<-lapply(all_data_sig, function(x) {pairwise.t.test(x, AllData$dev_stage, 
 print(t_test)
 
 
-t_test_all<-lapply(AllData[3:55], function(x) {pairwise.t.test(x, AllData$dev_stage, p.adj="holm")})
+t_test_all<-lapply(AllData[3:59], function(x) {pairwise.t.test(x, AllData$dev_stage, p.adj="holm")})
 print(t_test_all)
 t_test_all$MEturquoise
 

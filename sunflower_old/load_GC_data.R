@@ -6,7 +6,7 @@
 # This is done using DESeq
 
 # set cwd
-setwd('/scratch/ely67071/sunflower_dev_data/gene_count_data/')
+setwd('/scratch/ely67071/sunflower_inflo_dev_data_b3/gene_count_data/')
 library("DESeq2")
 
 # put all of the gene_count files into a character vector in order to load them 
@@ -22,9 +22,9 @@ data_table<-data.frame(sampleName=samples,fileName=gene_count_files)
 
 # load the DESeq data set
 # we read in the data using the DESeqDataSetFromHTSeqCount bc our dataset is in the same format as HTSeq data
-dds_set<-DESeqDataSetFromHTSeqCount(sampleTable=data_table,directory='/scratch/ely67071/sunflower_dev_data/gene_count_data/',design=~0)
+dds_set<-DESeqDataSetFromHTSeqCount(sampleTable=data_table,directory='/scratch/ely67071/sunflower_inflo_dev_data_b3/gene_count_data/',design=~0)
 
 # save the data set 
-saveRDS(dds_set,file="/home/ely67071/dev_RNAseq/sunflower/gene_count_sunflower_dev_deseq.Rdata")
+saveRDS(dds_set,file="/home/ely67071/dev_RNAseq/sunflower/gene_count_sunflower_info_deseq.Rdata")
 
 

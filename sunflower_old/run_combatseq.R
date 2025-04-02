@@ -11,12 +11,13 @@ library(sva)
 source("sunflower/Functions.R")
 
 
+packageVersion("ComBat_seq")
 # read in and process data
 
 setwd('/home/ely67071/dev_RNAseq/')
 
 # read in the data matrix
-summed_counts<-readRDS("/home/ely67071/dev_RNAseq/sunflower/gene_count_sunflower_dev_deseq.Rdata")
+summed_counts<-readRDS("/home/ely67071/dev_RNAseq/sunflower/gene_count_sunflower_info_deseq.Rdata")
 samples=c("10D_REP1_ATTACTCG", "20D_REP2_TCCGGAGA" ,"30D_REP2_CGCTCATT", "35D_REP1_GAGATTCC", 
           "HA_10D_2_ACCTTGGC", "HA_10D_3_ATATCTCG", "HA_20D_2_GCGCTCTA", 
           "HA_20D_3_AACAGGTT", "HA_30D_2_GGTGAACC", "HA_30D_3_CAACAATG", "HA_35D_2_TGGTGGCA", "HA_35D_3_AGGCAGAG")

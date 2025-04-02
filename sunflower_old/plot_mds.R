@@ -15,7 +15,7 @@ install.packages("Glimma")
 setwd('/home/ely67071/dev_RNAseq/')
 
 # read in the data matrix
-summed_counts<-readRDS("/home/ely67071/dev_RNAseq/sunflower/gene_count_sunflower_dev_deseq.Rdata")
+summed_counts<-readRDS("/home/ely67071/dev_RNAseq/sunflower/gene_count_sunflower_info_deseq.Rdata")
 dim(summed_counts)
 
 
@@ -39,13 +39,11 @@ metadata$dev_stage<-factor(metadata$dev_stage)
 
 # create the model
 summed_counts<-DESeqDataSetFromMatrix(counts(summed_counts),colData = metadata, design=~0+dev_stage)
-summed_counts$samples
-# pre-filter for reads where at least 3 samples (in ANY STAGE) have a count of 1 or higher
+
+# pre-filter for reads where at least 3 samples have a count of 1 or higher
 keep<-rowSums(counts(summed_counts)>=1)>=3
 length(which(keep==1))
 summed_counts_filt<-summed_counts[keep,]
-
-counts(summed_counts)>=1
 
 # will load the plot...need to save within the html
 glimmaMDS(summed_counts_filt, groups=metadata)
@@ -57,4 +55,4 @@ glimmaMDS(summed_counts_filt, groups=metadata)
 #legend("topright",inset=c(-0.4,0),legend=unique(dev_stage), fill=dev_stage)
 #dev.off()
 
-dds_set
+
