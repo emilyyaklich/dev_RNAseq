@@ -1,3 +1,9 @@
+# Name: sra upload
+# Author: Emily Lauren Yaklich
+# Date: May 07 2025
+# Version: Python 3.10
+# Description: upload all files in a directory to ncbi sra uploads
+
 import os
 from ftplib import FTP
 import getpass
@@ -5,8 +11,8 @@ import getpass
 # --- CONFIGURATION ---
 FTP_HOST = "ftp-private.ncbi.nlm.nih.gov"
 FTP_USER = "subftp"
-LOCAL_DIR = "/scratch/ely67071/sunflower_cle_data/raw_rna_seq"
-REMOTE_DIR = "/uploads/ely67071_uga.edu_kqQ2RofH/Asteraceae_seq_data"
+LOCAL_DIR = "/home/emilyyaklich/directory_with_files_to_upload"
+REMOTE_DIR = "/uploads/NCBI_username/destination_folder"
 EXTENSION = "fastq.gz"
 # ----------------------
 
