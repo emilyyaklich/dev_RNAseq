@@ -10,27 +10,23 @@ library(DESeq2)
 library(dplyr)
 library(Glimma)
 library(sva)
-install.packages("Glimma")
+#install.packages("Glimma")
 
 setwd('/home/ely67071/dev_RNAseq/')
 
 # read in the data matrix
-summed_counts<-readRDS("/home/ely67071/dev_RNAseq/sunflower/gene_count_sunflower_dev_deseq.Rdata")
+summed_counts<-readRDS("/home/ely67071/dev_RNAseq/lettuce/gene_count_lettuce_dev_deseq.Rdata")
 dim(summed_counts)
 
 
 summed_counts
 
+samples=c("CM1", "CM2" ,"CM3", "CM4", "IM1", "IM2", "IM3", "IM4","IMFM1", "IMFM2", "IMFM3", "IMFM4","TM1", "TM2", "TM3", "TM4", "VM1", "VM2", "VM3","VM4")
 
-samples=c("10D_REP1_ATTACTCG", "20D_REP2_TCCGGAGA" ,"30D_REP2_CGCTCATT", "35D_REP1_GAGATTCC", 
-           "HA_10D_2_ACCTTGGC", "HA_10D_3_ATATCTCG", "HA_20D_2_GCGCTCTA", 
-           "HA_20D_3_AACAGGTT", "HA_30D_2_GGTGAACC", "HA_30D_3_CAACAATG", "HA_35D_2_TGGTGGCA", "HA_35D_3_AGGCAGAG")
-
-dev_stage<-sub(".*([0-9]{2,2}D).*", "\\1",samples)
-
+dev_stage <- sub("[0-9]+$", "", samples)
 
 metadata<-data.frame(samples, dev_stage)
-write.csv(as.data.frame(metadata), file='sunflower/metadata.csv')
+write.csv(as.data.frame(metadata), file='lettuce/metadata.csv')
 
 # create the factors of interest
 metadata$dev_stage<-factor(metadata$dev_stage)

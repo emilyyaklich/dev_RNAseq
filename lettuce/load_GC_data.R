@@ -6,15 +6,15 @@
 # This is done using DESeq
 
 # set cwd
-setwd('/scratch/ely67071/sunflower_dev_data/gene_count_data/')
+setwd('/scratch/ely67071/lettuce_dev_data/gene_count_data/')
 library("DESeq2")
 
 # put all of the gene_count files into a character vector in order to load them 
 gene_count_files<-dir(pattern="*\\.tab$")
 
-samples=c("10D_REP1_ATTACTCG", "20D_REP2_TCCGGAGA" ,"30D_REP2_CGCTCATT", "35D_REP1_GAGATTCC", 
-          "HA_10D_2_ACCTTGGC", "HA_10D_3_ATATCTCG", "HA_20D_2_GCGCTCTA", 
-          "HA_20D_3_AACAGGTT", "HA_30D_2_GGTGAACC", "HA_30D_3_CAACAATG", "HA_35D_2_TGGTGGCA", "HA_35D_3_AGGCAGAG")
+gene_count_files
+
+samples=c("CM1", "CM2" ,"CM3", "CM4", "IM1", "IM2", "IM3", "IM4","IMFM1", "IMFM2", "IMFM3", "IMFM4","TM1", "TM2", "TM3", "TM4", "VM1", "VM2", "VM3","VM4")
 
 # read the data into a dataframe
 data_table<-data.frame(sampleName=samples,fileName=gene_count_files)
@@ -22,9 +22,9 @@ data_table<-data.frame(sampleName=samples,fileName=gene_count_files)
 
 # load the DESeq data set
 # we read in the data using the DESeqDataSetFromHTSeqCount bc our dataset is in the same format as HTSeq data
-dds_set<-DESeqDataSetFromHTSeqCount(sampleTable=data_table,directory='/scratch/ely67071/sunflower_dev_data/gene_count_data/',design=~0)
+dds_set<-DESeqDataSetFromHTSeqCount(sampleTable=data_table,directory='/scratch/ely67071/lettuce_dev_data/gene_count_data/',design=~0)
 
 # save the data set 
-saveRDS(dds_set,file="/home/ely67071/dev_RNAseq/sunflower/gene_count_sunflower_dev_deseq.Rdata")
+saveRDS(dds_set,file="/home/ely67071/dev_RNAseq/lettuce/gene_count_lettuce_dev_deseq.Rdata")
 
 
