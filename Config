@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #   Name this project
-PROJECT="sunflower_dev"
+PROJECT="lettuce_dev"
 
 #   What email should we use for job notifications?
 EMAIL="ely67071@uga.edu"
@@ -26,12 +26,12 @@ ANNOTATION_FORMAT="GFF3"
 #   Where is the Genome Annotation file (GFF3 or GTF)?
 #   Include the full filepath
 #	This variable will be used in the 'Genome Index' and 'Reference Prep' steps
-GEN_ANN="/scratch/ely67071/sunflower_dev_data/genomes/Ha412HO_v2_braker.gff3"
+GEN_ANN="/scratch/ely67071/lettuce_dev_data/genomes/Hildegardhap1v1_2.gff"
 
 #   Where is the Genome FASTA file?
 #	Include the full filepath
 #	This variable will be used in the 'Genome Index' and 'Reference Prep' steps
-GEN_FASTA="/scratch/ely67071/sunflower_dev_data/genomes/Ha412HO_v2.fasta"
+GEN_FASTA="/scratch/ely67071/lettuce_dev_data/genomes/Hildegardhap1v1.fasta"
 
 ############################################
 ##########   Quality_Assessment   ##########
@@ -48,16 +48,16 @@ PARTITION="batch"
 QA_SBATCH="--nodes=1 --ntasks=4 --mem=5gb --time=06:00:00 --mail-type=BEGIN,END,FAIL --mail-user=${EMAIL} --partition=${PARTITION}"
 
 #   What is the file name suffix for files to be assessed?
-SUFFIX="fastq.gz"
+SUFFIX="fq.gz"
 
 #	Where is the directory containing your data to be assessed? 
 #	This can be a directory to multiple directories each containing a forward and reverse read which is the format of raw data from the GGBC
 #       Include the full file path, e.g. path/to/directory (with no trailing forward slash)
-QA_INPUTDIR="/scratch/ely67071/sunflower_dev_data/raw_rna_seq"
+QA_INPUTDIR="/scratch/ely67071/lettuce_dev_data/raw_rna_seq"
 
 #   Where do you want the FastQC results?
 #       Include the full file path, e.g. path/to/directory (with no trailing forward slash)
-QA_OUTPUTDIR="/scratch/ely67071/sunflower_dev_data/raw_rna_seq/quality"
+QA_OUTPUTDIR="/scratch/ely67071/lettuce_dev_data/raw_rna_seq/quality"
 
 #	A place for FASTQC to store temporary files
 QA_TEMP="/scratch/ely67071/temp"
@@ -164,12 +164,12 @@ NTHREAD=4
 #	This direcotry has to be created before program will run and needs writing permissions
 #	This directory path will also be used in the next read mapping step
 #	Include the full filepath
-GEN_DIR="/scratch/ely67071/sunflower_dev_data/genomes/genome_indices"
+GEN_DIR="/scratch/ely67071/lettuce_dev_data/genomes/genome_indices"
 
 #   Specify the length of genomic sequence to be used in constructing the splice junctions database.
 #   This length should be equal to ReadLength-1, where ReadLength is the length of reads
 #	(ex. for 2x100bp paired-end reads, the ideal value is 99)
-SPLICE_JUN=49
+SPLICE_JUN=149
 
 #	What tag name should be used as the exons' gene-parents (in GTF files this defaults to "gene_id")
 #	You only need to fill this out if: 1.) you are used a .gff3 file for annotations AND 
@@ -189,9 +189,9 @@ GENE_PARENT="Parent"
 ###### IMPORTANT: This step shares variables with Read-Mapping (below)
 
 #   Where do you want your output files to go? Include the full file path
-CJ_OUTPUTDIR="/scratch/ely67071/sunflower_dev_data/STAR_output/junction_data"
+CJ_OUTPUTDIR="/scratch/ely67071/lettuce_dev_data/STAR_output/junction_data"
 #       File name/path of where JOB IDs should be recorded
-CJ_JOB_LOG="/scratch/ely67071/sunflower_dev_data/CJ_job_log.txt"
+CJ_JOB_LOG="/scratch/ely67071/lettuce_dev_data/CJ_job_log.txt"
 
 ############################################
 ########    Filter_Junctions        ########
@@ -213,10 +213,10 @@ FJ_SBATCH="--nodes=1 --ntasks=4 --mem=22gb --time=04:00:00 --mail-type=BEGIN,END
 
 #	Where are the "SJ.out.tab" files? Include the full filepath
 #	This will also be where the concatenated filtered list is put
-JUNCTIONDIR="/scratch/ely67071/sunflower_dev_data/STAR_output/junction_data"
+JUNCTIONDIR="/scratch/ely67071/lettuce_dev_data/STAR_output/junction_data"
 
 #	Name of final list (will end in _SJ.filtered.tab)
-SJ_LISTNAME="sunflower_dev_"
+SJ_LISTNAME="lettuce_dev_"
 
 ## FILTERS:
 
@@ -252,20 +252,20 @@ RM_SBATCH="--nodes=1 --ntasks=16 --mem=50gb --time=45:00:00 --partition=${PARTIT
 
 #   Where are the trimmed files? This handler will accept EITHER a text file list of forward samples to map (include the full file path for each sample) OR
 #	a directory of input files (include the full file path). This may be the same as your output directory defined in adapter trimming (AT_OUTPUTDIR)
-RM_INPUT="/scratch/ely67071/sunflower_dev_data/raw_rna_seq"
+RM_INPUT="/scratch/ely67071/lettuce_dev_data/raw_rna_seq"
 #       File name/path of where JOB IDs should be recorded
-RM_JOB_LOG="/scratch/ely67071/sunflower_dev_data/RM_job_log_2nd_pass.txt"
+RM_JOB_LOG="/scratch/ely67071/lettuce_dev_data/RM_job_log_2nd_pass.txt"
 
 #   What shared suffix do the forward samples have?
 #       Example: _R1_paired.fq.gz
-FORWARD="_R1_001.fastq.gz"
+FORWARD="_1.fq.gz"
 
 #   What shared suffix do the reverse samples have? (leave blank if single-end)
 #       Example: _R2_paired.fq.gz
-REVERSE="_R2_001.fastq.gz"
+REVERSE="_2.fq.gz"
 
 #   Where do you want your output files to go? Include the full file path
-RM_OUTPUTDIR="/scratch/ely67071/sunflower_dev_data/STAR_output"
+RM_OUTPUTDIR="/scratch/ely67071/lettuce_dev_data/STAR_output"
 
 #	Define the number of threads to be used. 
 #	This must be set to the number of available cores on the server node
@@ -325,38 +325,10 @@ QUANT="GeneCounts"
 #		2.) If you have more than one filtered junction list (if Collect_Junctions was run with multiple sample groups),
 #			this variable can be a text file listing the full file paths for each junction file you want included	
 #	If not using additional junctions, leave blank
-FILTERED_JUNC_LIST="/scratch/ely67071/sunflower_dev_data/STAR_output/junction_data/sunflower_dev__SJ.filtered.tab"
+FILTERED_JUNC_LIST="/scratch/ely67071/lettuce_dev_data/STAR_output/junction_data/lettuce_dev__SJ.filtered.tab"
 
 ############################################
 ##########      Dependencies      ##########
 ############################################
 
-#   This section defines installations to
-#   various dependencies for dev_RNAseq
-#   With module paths specific to the Georgia Advanced Computing Resource Center (GACRC)
-
-#   Do we have FastQC installed?
-#module load FastQC/0.11.8-Java-1.8.0_144
-
-#   Do we have MultiQC installed?
-#module load MultiQC/1.5-foss-2016b-Python-2.7.14
-
-#	Do we have Trimmomatic installed?
-#module load Trimmomatic/0.36-Java-1.8.0_144 > /dev/null 2>&1
-
-#	Do we have STAR installed?
-#module load STAR/2.7.1a-foss-2016b
-#	Where is the STAR executable file?
-#STAR_FILE=/usr/local/apps/eb/STAR/2.7.1a-foss-2016b/bin/STAR
-
-#	Do we have RSEM installed?
-#module load RSEM/1.3.1-foss-2016b
-
-#	Do we have Samtools installed?
-#module load SAMtools/1.9-foss-2016b
-
-#module load picard/2.16.0-Java-1.8.0_144  
-
-#	Path to the Java Jar file
-#java -jar $EBROOTPICARD/picard.jar
 

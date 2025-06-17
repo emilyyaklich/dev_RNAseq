@@ -143,6 +143,81 @@ GeneSets_four <- function (dataset1, dataset2, dataset3, dataset4) {
 
 
 
+
+
+GeneSets_five <- function(dataset1, dataset2, dataset3, dataset4, dataset5) {
+  name1 <- deparse(substitute(dataset1))
+  name2 <- deparse(substitute(dataset2))
+  name3 <- deparse(substitute(dataset3))
+  name4 <- deparse(substitute(dataset4))
+  name5 <- deparse(substitute(dataset5))
+  
+  # Pairwise intersections
+  sig1_2 <- intersect(dataset1, dataset2)
+  sig2_3 <- intersect(dataset2, dataset3)
+  sig3_4 <- intersect(dataset3, dataset4)
+  sig4_5 <- intersect(dataset4, dataset5)
+  sig1_3 <- intersect(dataset1, dataset3)
+  sig1_4 <- intersect(dataset1, dataset4)
+  sig1_5 <- intersect(dataset1, dataset5)
+  sig2_4 <- intersect(dataset2, dataset4)
+  sig2_5 <- intersect(dataset2, dataset5)
+  sig3_5 <- intersect(dataset3, dataset5)
+  
+  # Pairwise-only
+  sig1_2only <- setdiff(sig1_2, union(dataset3, union(dataset4, dataset5)))
+  sig2_3only <- setdiff(sig2_3, union(dataset1, union(dataset4, dataset5)))
+  sig3_4only <- setdiff(sig3_4, union(dataset1, union(dataset2, dataset5)))
+  sig4_5only <- setdiff(sig4_5, union(dataset1, union(dataset2, dataset3)))
+  sig1_3only <- setdiff(sig1_3, union(dataset2, union(dataset4, dataset5)))
+  sig1_4only <- setdiff(sig1_4, union(dataset2, union(dataset3, dataset5)))
+  sig1_5only <- setdiff(sig1_5, union(dataset2, union(dataset3, dataset4)))
+  sig2_4only <- setdiff(sig2_4, union(dataset1, union(dataset3, dataset5)))
+  sig2_5only <- setdiff(sig2_5, union(dataset1, union(dataset3, dataset4)))
+  sig3_5only <- setdiff(sig3_5, union(dataset1, union(dataset2, dataset4)))
+  
+  # In common across all five datasets
+  InCommonAll <- Reduce(intersect, list(dataset1, dataset2, dataset3, dataset4, dataset5))
+  
+  # Unique to each dataset
+  sig1only <- setdiff(dataset1, union(dataset2, union(dataset3, union(dataset4, dataset5))))
+  sig2only <- setdiff(dataset2, union(dataset1, union(dataset3, union(dataset4, dataset5))))
+  sig3only <- setdiff(dataset3, union(dataset1, union(dataset2, union(dataset4, dataset5))))
+  sig4only <- setdiff(dataset4, union(dataset1, union(dataset2, union(dataset3, dataset5))))
+  sig5only <- setdiff(dataset5, union(dataset1, union(dataset2, union(dataset3, dataset4))))
+  
+  # Collect results
+  Indices <- list(
+    InCommonAll,
+    sig1_2only, sig2_3only, sig3_4only, sig4_5only,
+    sig1_3only, sig1_4only, sig1_5only,
+    sig2_4only, sig2_5only, sig3_5only,
+    sig1only, sig2only, sig3only, sig4only, sig5only
+  )
+  
+  names(Indices) <- c(
+    "InCommonAll",
+    paste0(name1, name2, "Only"),
+    paste0(name2, name3, "Only"),
+    paste0(name3, name4, "Only"),
+    paste0(name4, name5, "Only"),
+    paste0(name1, name3, "Only"),
+    paste0(name1, name4, "Only"),
+    paste0(name1, name5, "Only"),
+    paste0(name2, name4, "Only"),
+    paste0(name2, name5, "Only"),
+    paste0(name3, name5, "Only"),
+    paste0(name1, "Only"),
+    paste0(name2, "Only"),
+    paste0(name3, "Only"),
+    paste0(name4, "Only"),
+    paste0(name5, "Only")
+  )
+  
+  return(Indices)
+}
+
+
 ## Import files
 
 ImportCSVs <- function (DirPath, critP) {
