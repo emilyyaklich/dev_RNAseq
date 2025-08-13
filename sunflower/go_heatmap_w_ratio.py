@@ -145,19 +145,19 @@ def prepare_go_heatmap_ratio(treatment1, treatment2, treatment3, name1, name2, n
     return df_final
 
 
-wd = '/Users/emilyyaklich/Documents/'
+wd = '/Users/emilyyaklich/Downloads/sunflower/'
 # read in GO_result dfs
-go_10v20 = pd.read_csv(wd + 'deg/10_v20.csv')
-go_20v30 = pd.read_csv(wd + 'deg/20_v30.csv')
-go_30v35 = pd.read_csv(wd + 'deg/30_v35.csv')
+go_10v20 = pd.read_csv(wd + 'go_results/VMvFT_go.csv')
+go_20v30 = pd.read_csv(wd + 'go_results/FTvIM_go.csv')
+go_30v35 = pd.read_csv(wd + 'go_results/IMvIMFM_go.csv')
 
 # read in go-gene annotations
 go_gene = pd.read_csv(wd + 'Ha412GO_terms_interpro_b3.txt', sep='\t', header=None, names=['gene', 'go_terms'])
 
 # read in deseq results
-deseq_10v20 = pd.read_csv(wd + 'pairwise/result_10D_v_20D.csv')
-deseq_20v30 = pd.read_csv(wd + 'pairwise/result_20D_v_30D.csv')
-deseq_30v35 = pd.read_csv(wd + 'pairwise/result_30D_v_35D.csv')
+deseq_10v20 = pd.read_csv(wd + 'deseq_results/pairwise/result_10D_v_20D.csv')
+deseq_20v30 = pd.read_csv(wd + 'deseq_results/pairwise/result_20D_v_30D.csv')
+deseq_30v35 = pd.read_csv(wd + 'deseq_results/pairwise/result_30D_v_35D.csv')
 
 # get the gene IDs and whether increasing/decreasing expression for each GO term in each comparison of interest
 result_10v20 = go_gene_assoc(go_10v20, go_gene, deseq_10v20)
@@ -170,7 +170,7 @@ ratio_20v30 = calculate_up_fraction(result_20v30)
 ratio_30v35 = calculate_up_fraction(result_30v35)
 
 # create a dataframe that contains info at the intersection of all the GO terms between treatments
-all_go = prepare_go_heatmap_ratio(go_10v20,go_20v30,go_30v35, "10v20", "20v30", "30v35", ratio_10v20, ratio_20v30,ratio_30v35)
+all_go = prepare_go_heatmap_ratio(go_10v20,go_20v30,go_30v35, "VMvFT", "FTvIM", "IMvIMFM", ratio_10v20, ratio_20v30,ratio_30v35)
 # plot the heat map
 # decided not to use custom scale
 #custom_cmap = LinearSegmentedColormap.from_list('up_down', ["#009E73", "#D55E00"])
@@ -180,24 +180,36 @@ formatter.set_powerlimits((-2, 2))
 labels = list(all_go.index.values)
 plt.figure(figsize=(12, 8))
 go_terms = sns.heatmap(all_go, cbar_kws={'format': formatter}, yticklabels=labels, cmap="PRGn")
-go_terms.figure.savefig(wd + 'go_heatmap_ratio_PAG.png', dpi='figure', format="png", bbox_inches='tight')
+go_terms.figure.savefig(wd + 'go_heatmap_ratio_evolution.png', dpi='figure', format="png", bbox_inches='tight')
 plt.close()
 
 
 # add the gene to the excel files
 # List of DataFrames and their names
-dataframes = [("10v20", go_10v20, result_10v20), ("20v30", go_20v30, result_20v30), ("30v35", go_30v35, result_30v35)]
+dataframes = [("VMvFT", go_10v20, result_10v20), ("FTvIM", go_20v30, result_20v30), ("IMvIMFM", go_30v35, result_30v35)]
 
 # Drop the "Unnamed: 0" column if it exists
 for sheet_name, df, _ in dataframes:
     if "Unnamed: 0" in df.columns:
         df.drop(columns=["Unnamed: 0"], inplace=True)
 
+
 for sheet_name, df, nested_dict in dataframes:
+    print(f"Sheet: {sheet_name}")
+    print("Category values in df:", df["category"].unique())
+    print("Keys in nested_dict:", nested_dict.keys())
+
     df["genes"] = df["category"].map(lambda x: nested_dict.get(x, {}).get("genes", []))
+    print(df[["category", "genes"]].head())
+
+
+
+
+for sheet_name, df, nested_dict in dataframes:
+    df["genes"] = df["category"].apply(lambda x: nested_dict.get(x.split(":")[0] + ":" + x.split(":")[1], {}).get("genes", []))
 
 # Combine into one Excel file
-output_file = wd +"go_enrichment_pairwise_12-19-2024.xlsx"
+output_file = wd +"go_enrichment_pairwise_06-17-2025.xlsx"
 with pd.ExcelWriter(output_file, engine='xlsxwriter') as writer:
     for sheet_name, df, _ in dataframes:
         df.to_excel(writer, sheet_name=sheet_name, index=False)
