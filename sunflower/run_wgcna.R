@@ -53,7 +53,7 @@ gsg$allOK # this statement gives TRUE, so no further removal is necessary
 sampleTree<-hclust(dist(input_mat), method="average")
 par(cex=0.6)
 par(mar=c(0,4,2,0))
-png("sunflower/wgcna/plots/sample_clustering_outliers.png")
+png("sunflower/plots/wgcna/sample_clustering_outliers.png")
 plot(sampleTree, main= "Sample clustering to detect outliers", sub="",xlab="",cex.lab=1.5,cex.axis=1.5,cex.main=2)
 abline(h=200, col="red")
 dev.off()
@@ -88,7 +88,7 @@ sample_names<-rownames(input_mat_filt)
 
 # based on stage
 traitcolors<-labels2colors(metadata$dev_stage)
-png("sunflower/wgcna/plots/sample_relatedness_clusters.png")
+png("sunflower/plots/wgcna/sample_relatedness_clusters.png")
 plotDendroAndColors(sampleTree_filt,traitcolors)
 # no strong clusters indicating globally different groups of samples 
 dev.off()
@@ -101,7 +101,7 @@ saveRDS(sft,file='sunflower/wgcna/sft_power.RData')
 sft<-readRDS("sunflower/wgcna/sft_power.RData")
 
 # plot diagnostics
-png("sunflower/wgcna/plots/soft_threshold.png")
+png("sunflower/plots/wgcna/soft_threshold.png")
 par(mfrow=c(1,2))
 cex1=0.9
 plot(sft$fitIndices[,1],-sign(sft$fitIndices[,3])*sft$fitIndices[,2],xlab='Soft Threshold (power)',ylab='Scale Free Topology Model Fit, Signed R^2',main=paste("Scale independence"))
@@ -126,7 +126,7 @@ netwk<-readRDS("sunflower/wgcna/netwk_bicor_blocksize_default.RData")
 
 # look at results
 mergedColors=labels2colors(netwk$colors)
-png("sunflower/wgcna/plots/network_modules_bicor_blocksize_default.png")
+png("sunflower/plots/wgcna/network_modules_bicor_blocksize_default.png")
 plotDendroAndColors(netwk$dendrograms[[1]],mergedColors[netwk$blockGenes[[1]]], "Module colors", dendroLabels = FALSE,hang=0.03, addGuide = TRUE,guideHang = 0.05)
 dev.off()
 

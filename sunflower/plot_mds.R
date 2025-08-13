@@ -10,7 +10,7 @@ library(DESeq2)
 library(dplyr)
 library(Glimma)
 library(sva)
-install.packages("Glimma")
+#install.packages("Glimma")
 
 setwd('/home/ely67071/dev_RNAseq/')
 
@@ -30,7 +30,7 @@ dev_stage<-sub(".*([0-9]{2,2}D).*", "\\1",samples)
 
 
 metadata<-data.frame(samples, dev_stage)
-write.csv(as.data.frame(metadata), file='sunflower/metadata.csv')
+#write.csv(as.data.frame(metadata), file='sunflower/metadata.csv')
 
 # create the factors of interest
 metadata$dev_stage<-factor(metadata$dev_stage)
@@ -57,4 +57,4 @@ glimmaMDS(summed_counts_filt, groups=metadata)
 #legend("topright",inset=c(-0.4,0),legend=unique(dev_stage), fill=dev_stage)
 #dev.off()
 
-dds_set
+

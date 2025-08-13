@@ -42,9 +42,6 @@ dataSigdown<-lapply(dataSigdown, transform, Direction="Down")
 # combine the two lists of data frames 
 mydataSig<-mapply(rbind, dataSigup, dataSigdown,SIMPLIFY=FALSE)
 
-
-
-
 # subset the dataframes to only contain the gene ID and the direction of expression
 gene_direction_only<-lapply(mydataSig, function(x) {x[c("Gene", "Direction")]})
 gene_direction_only<-gene_direction_only %>% purrr::reduce(full_join,by=c('Gene'))
@@ -66,6 +63,7 @@ for(i in 1:nrow(gene_direction_only)){
     down<-append(down,gene_direction_only[i,"Gene"])
   }
 }
+
 #gene_direction_only<-names(gene_direction_only)
 # for each list created in the above loop, turn it into a df and then rbind them into one df
 difference<-data.frame(difference)
@@ -95,21 +93,14 @@ mydataSig$result_30D_v_35D<-cbind(mydataSig$result_30D_v_35D, Treatment='result_
 
 
 
-#mydataSig_treatment_full<-mydataSig_treatment %>% reduce(full_join,by=c('Treatment'))
-# join the df by gene ID
-#mydataSig_treatment_full<-mydataSig_treatment %>% purrr::reduce(full_join,by=c('Gene'))
+
 
 # combine all the dataframes on the rows
-
-
-
 mydataSig_full<-bind_rows(mydataSig$result_10D_v_20D, mydataSig$result_20D_v_30D, mydataSig$result_30D_v_35D)
 comparisons<-c("result_10D_v_20D","result_20D_v_30D","result_30D_v_35D")
 treatment<-c("Treatment")
 
-# one-hot encode the treatment variables -- why did I do this?
-
-
+# one-hot encode the treatment variables
 mydataSig_full<-mutate(mydataSig_full, result_10D_v_20D=ifelse(Treatment=="result_10D_v_20D", 1,0))
 mydataSig_full<-mutate(mydataSig_full, result_20D_v_30D=ifelse(Treatment=="result_20D_v_30D", 1,0))
 mydataSig_full<-mutate(mydataSig_full, result_30D_v_35D=ifelse(Treatment=="result_30D_v_35D", 1,0))
@@ -205,21 +196,3 @@ mydataSig_full[mydataSig_full$Gene == "g42883.t1", ]
 
 
 
-
-test<-mydataSig_plot %>%
-  filter(Direction == "Difference") 
-
-
-mydataSig_plot$Gene[mydataSig_plot$Direction =="Up" & mydataSig_plot$result_20D_v_30D == TRUE & mydataSig_plot$result_10D_v_20D == FALSE & mydataSig_plot$result_30D_v_35D == FALSE]
-
-
-mydataSig_plot$Gene[mydataSig_plot$Direction =="Difference" & mydataSig_plot$result_20D_v_30D == TRUE & mydataSig_plot$result_10D_v_20D == TRUE & mydataSig_plot$result_30D_v_35D == FALSE]
-
-
-genes_true <- mydataSig_5h_plot$Gene[mydataSig_5h_plot$Direction == "Difference" & mydataSig_5h_plot$AsterCLV3_5h == TRUE]
-genes_true
-
-genes_true <- mydataSig_5h_plot$Gene[mydataSig_5h_plot$AtCLV3p_5h == TRUE & mydataSig_5h_plot$AsterCLV3_5h == TRUE & mydataSig_5h_plot$AsterCLV3_L5S_5h==FALSE]
-genes_true
-genes_true <- mydataSig_5h_plot$Gene[mydataSig_5h_plot$AtCLV3p_5h == FALSE & mydataSig_5h_plot$AsterCLV3_5h == FALSE & mydataSig_5h_plot$AsterCLV3_L5S_5h==FALSE & mydataSig_5h_plot$AtCLV3p_S5L_5h==TRUE & mydataSig_5h_plot$Direction == "Up"]
-genes_true

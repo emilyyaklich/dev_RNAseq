@@ -18,7 +18,7 @@ library(DEGreport)
 #install.packages("Mfuzz")
 library(Mfuzz)
 #install.packages("factoextra")
-library(factoextra)
+
 library(cluster)
 library(dynamicTreeCut)
 #install.packages("fpc")
@@ -106,134 +106,11 @@ abline(h = 2.7, col = "brown", lwd = 2)
 dev.off()
 
 
-
 # plot tree heights
 png("sunflower/plots/clustering_differential/hclust_treeheights.png", width=2700, height=2100, res=300)
 heights<-sort(gene_hclust$height, decreasing = TRUE)
 plot(heights, type="p", xlab = "Number of Clusters", ylab= "Tree Cut Position")
 dev.off()
-
-
-gene_cluster <- cutree(gene_hclust, h=2.7)
-gene_cluster_df <- enframe(gene_cluster)
-# Using base R to rename columns
-names(gene_cluster_df) <- c("Gene", "cluster")
-
-
-# Check which clusters contain specific genes (WUS and CLV3)
-specific_genes <- c("g51546.t1", "g23024.t1")  # WUS and CLV3
-clusters_with_genes <- gene_cluster_df %>%
-  filter(Gene %in% specific_genes) %>%
-  select(Gene, cluster)
-
-# Print the clusters for specific genes
-wus_cluster <- clusters_with_genes %>% filter(Gene == "g51546.t1") %>% pull(cluster)
-clv_cluster <- clusters_with_genes %>% filter(Gene == "g23024.t1") %>% pull(cluster)
-
-
-print(paste("WUS: Cluster", wus_cluster))
-print(paste("CLV3: Cluster", clv_cluster))
-
-average_expression_df<-as.data.frame(scaled_expression_matrix)
-# Add gene names as a column
-average_expression_df$Gene <- rownames(scaled_expression_matrix)
-
-
-df_cluster <- average_expression_df %>% 
-  inner_join(gene_cluster_df, by = "Gene")
-
-write.csv(df_cluster, file = "sunflower/deseq_results/clustering/clustering_data_3_1.csv", row.names = FALSE)
-
-
-df_long <- df_cluster %>%
-  pivot_longer(cols = starts_with(c("D")), names_to = "samples", values_to = "Expression")
-
-# Plotting
-ggplot(df_long, aes(x = samples, y = Expression, group = Gene)) +
-  geom_line() +
-  geom_line(stat = "summary", fun = "mean", color = "brown", size = 1.5, aes(group = 1)) +
-  facet_wrap(~ cluster) +
-  labs(
-    x = "Developmental Stage",
-    y = "Averaged Expression",
-    title = "Faceted Line Plot of Averaged Expression Across Developmental Stages"
-  ) +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-
-cluster_gene_count <- df_long %>%
-  group_by(cluster) %>%
-  summarise(number_of_genes = n_distinct(Gene))
-
-# Create a named vector for facet labels
-facet_labels <- cluster_gene_count %>%
-  mutate(label = paste("Cluster", cluster, ":", number_of_genes)) %>%
-  pull(label, name = cluster)
-
-# Ensure facet_labels is a named vector
-facet_labels <- setNames(facet_labels, cluster_gene_count$cluster)
-
-
-# Ensure `samples` is numeric
-df_long$samples <- as.numeric(gsub("D", "", df_long$samples))
-
-
-# Plotting
-png("sunflower/plots/clustering_differential/hclust_clusters_3_1_PAG_darkgrey.png", width=2700, height=2100, res=300)
-ggplot(df_long, aes(x = samples, y = Expression, group = Gene)) +
-  geom_line() +
-  geom_line(stat = "summary", fun = "mean", color = "darkgrey", size = 1.5, aes(group = 1)) +
-  facet_wrap(~ cluster, labeller = labeller(cluster = facet_labels)) +
-  scale_x_continuous(
-    breaks = c(10, 20, 30, 35),
-    labels = c("VM", "FT", "IM", "IM/FM")
-  ) +
-  labs(
-    x = "Developmental Stage",
-    y = "Scaled Expression"
-  ) +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-dev.off()
-
-
-# PLOT FOR PAG
-summary_data <- df_long %>%
-  group_by(samples, cluster) %>%
-  summarise(Expression = mean(Expression), .groups = "drop") %>%
-  mutate(line_color = ifelse(cluster %in% c(1, 2, 8), as.factor(cluster), "darkgrey"))
-
-png("sunflower/plots/clustering_differential/hclust_clusters_3_1_PAG_colored.png", width=2700, height=2100, res=300)
-ggplot(df_long, aes(x = samples, y = Expression, group = Gene)) +
-  geom_line() +  
-  geom_line(data = summary_data,  
-            aes(x = samples, y = Expression, color = line_color),
-            size = 1.5, group = 1) +  
-  facet_wrap(~ cluster, labeller = labeller(cluster = facet_labels)) +
-  scale_x_continuous(
-    breaks = c(10, 20, 30, 35),
-    labels = c("VM", "FT", "IM", "IM/FM")
-  ) +
-  scale_color_manual(values = c("1" = "magenta", "2" = "cyan3", "8" = "goldenrod2", 
-                                "darkgrey" = "darkgrey")) +  
-  labs(
-    x = "Developmental Stage",
-    y = "Scaled Expression"
-  ) +
-  theme_minimal() +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    legend.position = "none",         
-    panel.grid = element_blank()       
-  )
-dev.off()
-
-
-
-
-
-
 
 
 # Define the updated heights at which to cut the tree
@@ -339,11 +216,6 @@ for (i in seq_along(cut_heights)) {
 
 
 
-
-
-
-
-
 # just show two clusters CLV3 is in for the lowest cut
 
 
@@ -385,6 +257,73 @@ ggplot(df_subset, aes(x = samples, y = Expression, group = Gene)) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 dev.off()
+
+
+
+
+
+#### Plotting for PAG ####
+
+# Plotting
+png("sunflower/plots/clustering_differential/hclust_clusters_3_1_PAG_darkgrey.png", width=2700, height=2100, res=300)
+ggplot(df_long, aes(x = samples, y = Expression, group = Gene)) +
+  geom_line() +
+  geom_line(stat = "summary", fun = "mean", color = "darkgrey", size = 1.5, aes(group = 1)) +
+  facet_wrap(~ cluster, labeller = labeller(cluster = facet_labels)) +
+  scale_x_continuous(
+    breaks = c(10, 20, 30, 35),
+    labels = c("VM", "FT", "IM", "IM/FM")
+  ) +
+  labs(
+    x = "Developmental Stage",
+    y = "Scaled Expression"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+dev.off()
+
+
+# PLOT FOR PAG
+summary_data <- df_long %>%
+  group_by(samples, cluster) %>%
+  summarise(Expression = mean(Expression), .groups = "drop") %>%
+  mutate(line_color = ifelse(cluster %in% c(1, 2, 8), as.factor(cluster), "darkgrey"))
+
+png("sunflower/plots/clustering_differential/hclust_clusters_3_1_PAG_colored.png", width=2700, height=2100, res=300)
+ggplot(df_long, aes(x = samples, y = Expression, group = Gene)) +
+  geom_line() +  
+  geom_line(data = summary_data,  
+            aes(x = samples, y = Expression, color = line_color),
+            size = 1.5, group = 1) +  
+  facet_wrap(~ cluster, labeller = labeller(cluster = facet_labels)) +
+  scale_x_continuous(
+    breaks = c(10, 20, 30, 35),
+    labels = c("VM", "FT", "IM", "IM/FM")
+  ) +
+  scale_color_manual(values = c("1" = "magenta", "2" = "cyan3", "8" = "goldenrod2", 
+                                "darkgrey" = "darkgrey")) +  
+  labs(
+    x = "Developmental Stage",
+    y = "Scaled Expression"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "none",         
+    panel.grid = element_blank()       
+  )
+dev.off()
+
+
+
+
+
+
+
+
+
+
+
 
 
 
