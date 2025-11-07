@@ -53,10 +53,10 @@ def process_files(directory, output_filename):
     excel_writer.close()
 
 # Process files for 5h
-process_files("cle_results/x5h/", "cle_results/CLE_5h.xlsx")
+#process_files("cle_results/x5h/", "cle_results/CLE_5h.xlsx")
 
 # Process files for 24h
-process_files("cle_results/x24h/", "cle_results/CLE_24h.xlsx")
+#process_files("cle_results/x24h/", "cle_results/CLE_24h.xlsx")
 
 process_files("pairwise/", "pairwise/staged_sunflower.xlsx")
 
@@ -109,5 +109,5 @@ def process_files2(directory, output_filename):
     excel_writer.close()
 
 
-process_files2("clustering/", "clustering/clusters_sunflower2_7.xlsx")
+process_files2("clustering/", "clustering/clusters_sunflower2_4.xlsx")
 
