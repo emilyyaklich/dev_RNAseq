@@ -57,13 +57,13 @@ where `Config` is the full file path to the configuration file.
 
 You will use the contents of the output (directory specified in the Config file) for the next step
 
-## Step 4: Read_Mapping (and transcript quantification)
+## Step 4: Read_Mapping (and transcript quantification: optional)
 
 The Read_Mapping handler uses STAR to map reads to the genome indexed in step 3.
 
 This handler can accept as input EITHER a directory or a text-file list of forward samples (it will find the reverse samples based on the naming suffix specified in the config file)
 
-**We are using -GeneCounts flag of STAR (specified in Config file) which will also quanitfy our transcripts and the output will be in a `.tab` file (one file for each sample) with the rest of the STAR output. These are the files that we will use to analyze our expression data, so this is the most important output from this step.**
+** If you choose to quantify with STAR, the -GeneCounts flag of STAR (specified in Config file) which will also quanitfy our transcripts and the output will be in a `.tab` file (one file for each sample) with the rest of the STAR output. These are the files that we will use to analyze our expression data, so this is the most important output from this step. If you do this, MUST quantify with a GTF file (STAR does not handle GFF3 files for quantificaiton well...it will quanitfy, but not per gene, per transcript). **
 
 ### Option for 2-pass mapping
 STAR can perform a 2-pass mapping strategy to increase mapping sensitivity around novel splice junctions. This works by running a 1st mapping pass for all samples with the "usual" parameters to identify un-annotated splice junctions. Then mapping is re-run, using the junctions detected in the first pass (in addition to the annotated junctions specified in the genome annotation file). This 2-pass mapping strategy is recommended by GATK and ENCODE best-practices for better alignments around novel splice junctions.
@@ -109,25 +109,34 @@ If you have sequence data from the same sample across multiple lanes/runs, the b
 #### Alignment File Output  
 Two alignment files are output from STAR with this handler - one alignment file in genomic coordinates and one translated into transcript coordinates (e.g.`*Aligned.toTranscriptome.out.bam`). The default format of the former is an unsorted SAM file. If you plan on using the genomic coordinate alignments for SNP calling, you have the option of getting these output as coordinate-sorted BAM files (similar to the `samtools sort` command) by putting a "yes" for the `GENOMIC_COORDINATE_BAMSORTED` variable in the config. Note that this will add significant computational time and memory.
 
-## Step 5: Prepare for DESEq2
+## Step 5: Quantify reads with FeatureCounts
 
-The output of STAR GeneCounts must be properly formatted to read into DESEq2. The file format needs to be changed as the GeneCounts output has 4 columns: 1-GeneID, 2-unstranded counts, 3-forward strand counts, and 4-reverse strand counts. DESeq can only read in files with 2 columns (GeneID and one count column). The ```prepare_DESeq_input.sh``` extracts the first and fourth columns from the files (the data we are using is reverse-stranded).
+`run_featureCounts.sh`
+- -p → tells featureCounts to treat input as paired-end
+- -B → only count fragments where both mates are successfully aligned
+- -C → only count properly paired fragments (mates mapped to the same chromosome with correct orientation and distance)
+- T is number of threads (I am doing 8)
+- -s 2 stranded mRNA-seq kit (Kapa Biosystems) is the kit used, so I want reverse stranded reads (This means the reads align to the opposite strand of the original RNA transcript)
+
+The output is: `sunflower_dev_fc_gtf.txt` and `sunflower_dev_fc_gtf.txt.summary`
 
 # Part II: Expression Analysis 
 This will mostly be in R using [DESeq2](https://bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.html) for differential expression analysis and [WGCNA](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-9-559) for a co-expression network analysis. 
 
 Special note on DGE analysis: There are many, many programs that will run DGE analyses with tons of options for methods within each program (on example being edgeR)...it is crucial to understand each test and how it is handling your data in order to make a decision for which program to use. That being said, the following methods are what I found were best for my data, but there are many ways to do similar analyses. 
 
-## 0. Pre-process data into matrix
-Load the GeneCount data into a DESeq dataset and collapse technical replicates (if applicaple)
-`load_GC_data_and_sum_reps.R`
-## 1. Visualize data in an MDS plot
-`plot_MDS.R`
-This will give us an idea of the relationship between our samples. In the next step we will be correcting for varaition, but it is important to visualize at this step.
-## 2. Correct for unwanted variation using [ComBat-Seq](https://github.com/zhangyuqing/ComBat-seq) and run DEseq
-`run_DGE_deseq_sunflower_inflo_combatseq.R`
-We will visualize the corrected samples in an MDS plot as well (compare with above). The model we are using to run the differential epxression analysis is ~0+dev_stage as we are curious about differential expression wrt dev_stage. 
+## 1. Correct for unwanted variation using [ComBat-Seq](https://github.com/zhangyuqing/ComBat-seq) and run DEseq
+`run_combatseq_fc.R`
+
+This will visualize sample relationships before and after batch correction.
+
+## 2. Run DESeq2
+
+`run_DGE_deseq_sunflower_dev_fc.R`
+
+The model we are using to run the differential epxression analysis is ~0+dev_stage as we are curious about differential expression wrt dev_stage. 
+
 ## 3. Visualize DE in an Upset Plot
-`analyze_DGE_deseq_sunflower_inflo_combatseq.R`
+`analyze_DGE_deseq_sunflower_dev_fc.R`
 ## 4. Run and analyze WGCNA
 
