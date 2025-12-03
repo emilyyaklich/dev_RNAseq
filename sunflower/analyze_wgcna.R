@@ -4,21 +4,20 @@
 # Version:4.2.1
 # Description: will analyze wgcna network for the developmental expression
 
-#install.packages("abind")
+
 #install.packages("VennDiagram")
 
 library(WGCNA)
 library(mltools)
 library(data.table)
 library(FDRestimation)
-library(car)
 library(emmeans)
 library(gtools)
 library(dplyr)
 library(ggplot2)
 library(reshape2)
 library(gridExtra)
-library(ggpubr)
+#library(ggpubr)
 library(goseq)
 library(GO.db)
 library(tidyr)
@@ -81,7 +80,7 @@ long_data <- pivot_longer(MEs,
                           names_to = "variable", # Name of the new column that will contain variable names
                           values_to = "value") # Name of the new column that will contain values
 
-
+?Anova
 
 # linear regression 
 # process the metadata
@@ -108,12 +107,30 @@ LR_mod_results <- lapply(AllData[,c(3:55)], function(x) {LR_Mod(x,AllData)})
 str(LR_mod_results)
 
 
-LR_mod_ANOVA <- lapply(LR_mod_results, function(x) {as.data.frame(Anova(x,test="F",type=2))})
-?Anova
-LR_mod_ANOVA$MEyellow
-# save f and p vals
-anova_columns <- lapply(LR_mod_ANOVA, function(x) {x[c(1),c(3,4)]})
 
+# run ANOVA on each of the models in LR_mod_results
+LR_mod_ANOVA <- lapply(LR_mod_results, function(mod) {
+  # perform ANOVA using base R's aov() function
+  anova_result <- summary(aov(mod))  
+  
+  # extract F-statistic and p-value from the ANOVA table (first row)
+  f_p_vals <- anova_result[[1]][, c("F value", "Pr(>F)")]
+  
+  return(f_p_vals)
+})
+
+
+
+
+
+
+
+
+
+# If you want to store F and p-values into a separate data frame or list
+anova_columns <- lapply(LR_mod_ANOVA, function(x) {
+  x[1, ]  # Extract the first row (assuming this is the main effect of dev_stage)
+})
 
 
 ## testing out Kruskal Wallis test ##
@@ -315,7 +332,7 @@ png('sunflower/plots/wgcna/change_plots/subset4_w_error.png', width=2000, height
 plot_4<-do.call(grid.arrange, subset_4)
 dev.off()
 
-subset_5 <- plot_list[49:57]
+subset_5 <- plot_list[49:53]
 png('sunflower/plots/wgcna/change_plots/subset5_w_error.png', width=2000, height =2200, res=300)
 plot_5<-do.call(grid.arrange, subset_5)
 dev.off()

@@ -63,7 +63,7 @@ for (df in mydataSig_pairwise_cs) {
 # Get unique gene names
 DE_genes <- unique(DE_genes)
 
-"g9915.t1" %in% DE_genes
+"g9915" %in% DE_genes
 
 subset_matrix <- vsd_matrix[rownames(vsd_matrix) %in% DE_genes, ]
 
@@ -143,14 +143,14 @@ for (i in seq_along(cut_heights)) {
   
   
   # Check which clusters contain specific genes (WUS and CLV3)
-  specific_genes <- c("g51546.t1", "g23024.t1")  # WUS and CLV3
+  specific_genes <- c("g51546", "g23024")  # WUS and CLV3
   clusters_with_genes <- gene_cluster_df %>%
     filter(Gene %in% specific_genes) %>%
     select(Gene, cluster)
   
   # Print the clusters for specific genes
-  wus_cluster <- clusters_with_genes %>% filter(Gene == "g51546.t1") %>% pull(cluster)
-  clv_cluster <- clusters_with_genes %>% filter(Gene == "g23024.t1") %>% pull(cluster)
+  wus_cluster <- clusters_with_genes %>% filter(Gene == "g51546") %>% pull(cluster)
+  clv_cluster <- clusters_with_genes %>% filter(Gene == "g23024") %>% pull(cluster)
   
   print(paste("Cut Height:", h))
   print(paste("WUS: Cluster", wus_cluster))
@@ -220,7 +220,7 @@ for (i in seq_along(cut_heights)) {
 
 
 # Specify the clusters of interest
-clusters_of_interest <- c("558", "126")  # Replace with your cluster IDs
+clusters_of_interest <- c("615", "317")  # Replace with your cluster IDs
 
 # Subset the data to include only the clusters of interest
 df_subset <- df_long %>%
@@ -330,7 +330,6 @@ dev.off()
 
 
 ## calculate asw
-
 
 
 # Define a range of cut heights

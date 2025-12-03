@@ -193,7 +193,7 @@ png('sunflower/plots/wgcna/change_plots/subset4_w_DE.png', width=2000, height =2
 plot_4<-do.call(grid.arrange, subset_4)
 dev.off()
 
-subset_5 <- plot_list_w_DE[49:55]
+subset_5 <- plot_list_w_DE[49:53]
 png('sunflower/plots/wgcna/change_plots/subset5_w_DE.png', width=2000, height =2200, res=300)
 plot_5<-do.call(grid.arrange, subset_5)
 dev.off()

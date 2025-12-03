@@ -24,35 +24,6 @@ DEData_pairwise_cs<-ImportCSVs('sunflower/deseq_results/pairwise',0.05)
 mydataSig_pairwise_cs<-lapply(DEData_pairwise_cs,SigDEdf,PvaluesCol=7,CritP=0.05)
 
 
-
-####### old #######
-DEData_pairwise_cs_old<-ImportCSVs('sunflower_old/deseq_results/pairwise',0.05)
-# filter out significant results
-mydataSig_pairwise_cs_old<-lapply(DEData_pairwise_cs_old,SigDEdf,PvaluesCol=7,CritP=0.05)
-
-
-setdiff(mydataSig_pairwise_cs$result_10D_v_20D$Gene, mydataSig_pairwise_cs_old$result_10D_v_20D$Gene)
-setdiff(mydataSig_pairwise_cs_old$result_10D_v_20D$Gene, mydataSig_pairwise_cs$result_10D_v_20D$Gene)
-
-setdiff(mydataSig_pairwise_cs$result_20D_v_30D$Gene, mydataSig_pairwise_cs_old$result_20D_v_30D$Gene)
-setdiff(mydataSig_pairwise_cs_old$result_20D_v_30D$Gene, mydataSig_pairwise_cs$result_20D_v_30D$Gene)
-
-setdiff(mydataSig_pairwise_cs$result_30D_v_35D$Gene, mydataSig_pairwise_cs_old$result_30D_v_35D$Gene)
-setdiff(mydataSig_pairwise_cs_old$result_30D_v_35D$Gene, mydataSig_pairwise_cs$result_30D_v_35D$Gene)
-
-
-"g8091.t1" %in% DEData_pairwise_cs$result_10D_v_20D$Gene
-"g8091.t1" %in% DEData_pairwise_cs_old$result_10D_v_20D$Gene
-
-length(DEData_pairwise_cs_old$result_10D_v_20D$Gene)
-
-
-setdiff(DEData_pairwise_cs$result_10D_v_20D$Gene, DEData_pairwise_cs_old$result_10D_v_20D$Gene)
-
-setdiff(DEData_pairwise_cs_old$result_10D_v_20D$Gene, DEData_pairwise_cs$result_10D_v_20D$Gene)
-
- ###### end of OLD ########
-
 # see which genes overlap (input into upset plot)
 SigOverlap_pairwise_cs<-GeneSets(mydataSig_pairwise_cs$result_10D_v_20D[1], mydataSig_pairwise_cs$result_20D_v_30D[1],mydataSig_pairwise_cs$result_30D_v_35D[1])
 names(SigOverlap_pairwise_cs)
@@ -66,7 +37,6 @@ dev.off()
 
 
 # MA plots
-
 deseq <- readRDS('sunflower/deseq_results/deseq_dataset_results_pairwise_combatseq.RData')
 deseq$samples
 
@@ -295,9 +265,7 @@ ggsave("sunflower/plots/maplot_30v35_nolabel.png", plot = ma_plot, width = 3, he
 
 
 
-
-
-subset(ma_data, significant == "down" & lfc > 0)
+### below are colors I used for the evolution 2025 conference 
 
 
 

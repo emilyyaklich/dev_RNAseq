@@ -21,8 +21,6 @@ library(stringr)
 source("sunflower/Functions.R")
 
 
-
-# (1) LOOK AT DATA BETWEEN @ 5H
 # read in the data
 DEData<-ImportCSVs('sunflower/deseq_results/pairwise',0.05)
 # filter out significant results
@@ -98,7 +96,7 @@ mydataSig$result_30D_v_35D<-cbind(mydataSig$result_30D_v_35D, Treatment='result_
 # combine all the dataframes on the rows
 mydataSig_full<-bind_rows(mydataSig$result_10D_v_20D, mydataSig$result_20D_v_30D, mydataSig$result_30D_v_35D)
 comparisons<-c("result_10D_v_20D","result_20D_v_30D","result_30D_v_35D")
-treatment<-c("Treatment")
+treatment<-c("Comparisons")
 
 # one-hot encode the treatment variables
 mydataSig_full<-mutate(mydataSig_full, result_10D_v_20D=ifelse(Treatment=="result_10D_v_20D", 1,0))
@@ -136,7 +134,9 @@ ComplexUpset::upset(mydataSig_plot,
                       (counts=TRUE,mapping=aes(fill=Direction))
                       +scale_fill_manual(
                         values=c('Up'='#009E73','Down'='#D55E00','Difference'='#CC79A7'))+scale_y_continuous(expand=expansion(mult=c(0,0.1)))+theme(panel.grid.major=element_blank(),panel.grid.minor=element_blank()
-                                                                                                                                                    ,axis.line=element_line(colour='black'))),
+                                                                                                                                                    ,axis.line=element_line(colour='black'), axis.text = element_text(color = "black", size = 12),
+                                                                                                                                                    axis.title = element_text(color = "black", size = 14),
+                                                                                                                                                    plot.title = element_text(color = "black", size = 16, face = "bold"))),
                     set_sizes=upset_set_size(geom=geom_bar(width = 0.4))+theme(axis.line.x = element_line(colour = 'black'),axis.ticks.x =element_line() ),
                     themes=upset_modify_themes(list('intersections_matrix'=theme(text=element_text(size=15)))))
 dev.off()
@@ -175,24 +175,23 @@ dev.off()
 
 
 # look for where WUS
-mydataSig_full[mydataSig_full$Gene == "g51546.t1", ] # only 20 vs 30
+mydataSig_full[mydataSig_full$Gene == "g51546", ] # only 20 vs 30
 
 # look where CLV3 is
-mydataSig_plot[mydataSig_plot$Gene == "g23024.t1", ] # only 20 vs 30
+mydataSig_full[mydataSig_full$Gene == "g23024", ] # only 20 vs 30
 
 # LFY
-mydataSig_plot[mydataSig_plot$Gene == "g33259.t1", ] # only 20 vs 30
+mydataSig_full[mydataSig_full$Gene == "g33259", ] # only 20 vs 30
 
 
 # look for where PIN1
-mydataSig_full[mydataSig_full$Gene == "g50085.t1", ] 
+mydataSig_full[mydataSig_full$Gene == "g50085", ] 
 
 # look for where PIN3
-mydataSig_full[mydataSig_full$Gene == "g25857.t1", ] 
+mydataSig_full[mydataSig_full$Gene == "g25857", ] 
 
 
-# look for where PIN3
-mydataSig_full[mydataSig_full$Gene == "g42883.t1", ] 
+
 
 
 

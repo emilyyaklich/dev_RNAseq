@@ -18,7 +18,7 @@ packageVersion("DESeq2")
 
 
 
-adjusted_counts<-read.csv('sunflower/adjusted_counts_combatseq.csv', row.names=1)
+adjusted_counts<-read.csv('sunflower/adjusted_counts_combatseq_fc_gtf.csv', row.names=1)
 metadata<-read.csv('sunflower/metadata.csv', row.names=1)
 # create the factors of interest
 metadata$dev_stage<-factor(metadata$dev_stage)
@@ -65,3 +65,4 @@ write.csv(as.data.frame(results_10D), file='sunflower/deseq_results/indiv_res/re
 write.csv(as.data.frame(results_20D), file='sunflower/deseq_results/indiv_res/result_20D.csv')
 write.csv(as.data.frame(results_30D), file='sunflower/deseq_results/indiv_res/result_30D.csv')
 write.csv(as.data.frame(results_35D), file='sunflower/deseq_results/indiv_res/result_35D.csv')
+

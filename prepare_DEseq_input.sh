@@ -12,7 +12,7 @@
 
 
 
-for fn in /scratch/ely67071/lettuce_dev_data/gene_count_data/*.tab; do
+for fn in /scratch/ely67071/sunflower_dev_data/gene_count_data_gtf/*.tab; do
     awk -F '\t' 'NR>4 { print $1, $4 }' "$fn" >tmp_file 
     mv tmp_file "$fn"
 done    
