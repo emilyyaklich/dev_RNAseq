@@ -58,6 +58,7 @@ where `Config` is the full file path to the configuration file.
 You will use the contents of the output (directory specified in the Config file) for the next step
 
 ## Step 4: Read_Mapping (and transcript quantification: optional)
+### Important note for read quantification: if quantifying reads with STAR you must use a GTF file, not a GFF3 file. STAR does not handle quantification correctly with a GFF3 file. 
 
 The Read_Mapping handler uses STAR to map reads to the genome indexed in step 3.
 
@@ -110,6 +111,7 @@ If you have sequence data from the same sample across multiple lanes/runs, the b
 Two alignment files are output from STAR with this handler - one alignment file in genomic coordinates and one translated into transcript coordinates (e.g.`*Aligned.toTranscriptome.out.bam`). The default format of the former is an unsorted SAM file. If you plan on using the genomic coordinate alignments for SNP calling, you have the option of getting these output as coordinate-sorted BAM files (similar to the `samtools sort` command) by putting a "yes" for the `GENOMIC_COORDINATE_BAMSORTED` variable in the config. Note that this will add significant computational time and memory.
 
 ## Step 5: Quantify reads with FeatureCounts
+
 
 `run_featureCounts.sh`
 - -p → tells featureCounts to treat input as paired-end
