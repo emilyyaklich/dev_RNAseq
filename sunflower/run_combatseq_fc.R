@@ -1,6 +1,6 @@
-# Name: run_combatseq.R
+# Name: run_combatseq_fc.R
 # Author: EY
-# Date: 03/06/2023
+# Date: 03/06/2023 (Modified November 2025)
 # Version:4.2.1
 # Description: Will run combatseq normalization
 

@@ -1,6 +1,6 @@
-# Name: analyze DGE deseq sunflower inflo ruvseq
+# Name: analyze_DGE_deseq_sunflower_dev_fc
 # Author: EY (based off of code written by E. Dittmar)
-# Date: 08/29/2023
+# Date: 08/29/2023 (Modified November 2025)
 # Version:4.2.1
 # Description: Will analyze the output from the DESeq DGE with combatseq for pairwise dev stages
 # need Functions.R written by ED

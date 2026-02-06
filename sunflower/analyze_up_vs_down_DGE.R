@@ -126,7 +126,7 @@ mydataSig_plot[is.na(mydataSig_plot)] <- FALSE
 # create a direction variable (stacked bar chart colored by column)
 Direction<-colnames(mydataSig_plot)[2]
 # plot the upset 
-png("sunflower/plots/up_AND_down_DGE.png", width=900, height=700)
+png("sunflower/plots/up_AND_down_DGE.png", width=2000, height=2000, res=300)
 ComplexUpset::upset(mydataSig_plot,
                     treatments,name="Treatment",
                     base_annotations=list
