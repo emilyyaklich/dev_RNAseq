@@ -1,6 +1,8 @@
 # dev_RNAseq
-A pipeline for analyzing expression across developmental stages. 
-Built from Emily Dittmar's sunflower expression pipeline: https://github.com/EDitt/Sunflower_RNAseq
+
+A reproducible pipeline for analyzing gene expression across developmental stages and species. 
+This workflow was adapted from Emily Dittmar’s Sunflower RNA-seq pipeline (https://github.com/EDitt/Sunflower_RNAseq) and extended for cross-species differential-expression analysis, expression clustering, and visualization.
+
 
 
 # Part I: Mapping reads and quantifying transcripts
